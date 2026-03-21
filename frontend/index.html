@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5.1 AutoMaster — Suno to Surround</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="logo">5.1<span>·</span>AutoMaster <span>/ SUNO → SURROUND</span></div>
+  <div class="topbar-sep"></div>
+  <div class="hw-pills">
+    <div class="hw-pill">
+      <div class="dot" style="background:#5b9cf6"></div>
+      VRAM
+      <div class="bw"><div class="bf" id="vb" style="width:0%;background:#5b9cf6"></div></div>
+      <span id="vv">—</span>
+    </div>
+    <div class="hw-pill">
+      <div class="dot" style="background:#e8a030"></div>
+      RAM
+      <div class="bw"><div class="bf" id="rb" style="width:0%;background:#e8a030"></div></div>
+      <span id="rv">0 GB</span>
+    </div>
+    <div class="hw-pill">
+      <div class="dot" id="sdot" style="background:#3a3f4d"></div>
+      <span id="stxt">IDLE</span>
+    </div>
+  </div>
+  <button class="topbar-btn" id="tune-btn">⚙ Studio Tuning</button>
+</div>
+
+<!-- Tuning Overlay & Drawer -->
+<div class="tov" id="tov"></div>
+<div class="tdrawer" id="tdrawer">
+  <div class="tdh">
+    <div class="tdtitle">⬡ PRO STUDIO TUNING</div>
+    <button class="tdclose" onclick="window.app.tuningUI.close()">✕</button>
+  </div>
+  <div class="tdbody">
+
+    <!-- Genre Presets -->
+    <div class="tsec">
+      <div class="tseclabel">Genre Preset</div>
+      <div class="preset-grid" id="pg">
+        <div class="pchip active" data-p="pop" onclick="window.app.tuningUI.applyPreset('pop',this)">
+          <span class="picon">🎤</span>Pop
+        </div>
+        <div class="pchip" data-p="rock" onclick="window.app.tuningUI.applyPreset('rock',this)">
+          <span class="picon">🎸</span>Rock
+        </div>
+        <div class="pchip" data-p="electronic" onclick="window.app.tuningUI.applyPreset('electronic',this)">
+          <span class="picon">🎛</span>Electronic
+        </div>
+        <div class="pchip" data-p="jazz" onclick="window.app.tuningUI.applyPreset('jazz',this)">
+          <span class="picon">🎷</span>Jazz
+        </div>
+        <div class="pchip" data-p="hiphop" onclick="window.app.tuningUI.applyPreset('hiphop',this)">
+          <span class="picon">🎧</span>Hip-Hop
+        </div>
+        <div class="pchip" data-p="cinematic" onclick="window.app.tuningUI.applyPreset('cinematic',this)">
+          <span class="picon">🎬</span>Cinematic
+        </div>
+      </div>
+    </div>
+
+    <!-- Signal Chain -->
+    <div class="tsec">
+      <div class="tseclabel">Signal Chain</div>
+      <div class="chain-vis">
+        <div class="cn on">HPF</div><div class="carr">›</div>
+        <div class="cn on" id="cn-tape">Tape</div><div class="carr">›</div>
+        <div class="cn on" id="cn-console">Console</div><div class="carr">›</div>
+        <div class="cn on" id="cn-eq">EQ</div><div class="carr">›</div>
+        <div class="cn on" id="cn-comp">Bus Comp</div><div class="carr">›</div>
+        <div class="cn on" id="cn-xciter">Exciter</div><div class="carr">›</div>
+        <div class="cn on" id="cn-spatial">Spatial</div><div class="carr">›</div>
+        <div class="cn on">Limiter</div>
+      </div>
+    </div>
+
+    <!-- Analog Color -->
+    <div class="tsec">
+      <div class="tseclabel">Analog Color</div>
+      <div class="trow">
+        <div class="tname">Tape saturation</div>
+        <input type="range" class="tslider ak" id="t-tape" min="0" max="100" value="35">
+        <div class="tval" id="tv-tape">35%</div>
+      </div>
+      <div class="trow">
+        <div class="tname">Harmonic drive</div>
+        <input type="range" class="tslider ak" id="t-harm" min="0" max="100" value="20">
+        <div class="tval" id="tv-harm">20%</div>
+      </div>
+      <div class="ttr">
+        <div class="ttrname">Console model</div>
+        <select class="cval" id="t-console" style="font-size:10px;padding:2px 14px 2px 5px;background:var(--bg4);border:1px solid var(--border2);border-radius:3px;color:var(--amber);font-family:var(--mono)">
+          <option>SSL 4000 G</option>
+          <option>Neve 1073</option>
+          <option>API 2500</option>
+          <option>Studer A800</option>
+        </select>
+      </div>
+      <div class="ttr">
+        <div class="ttrname">Tape hiss floor</div>
+        <div class="tpill" id="tp-hiss" data-chain="cn-tape"></div>
+      </div>
+      <div class="ttr">
+        <div class="ttrname">Vinyl warmth</div>
+        <div class="tpill"></div>
+      </div>
+    </div>
+
+    <!-- Dynamics -->
+    <div class="tsec">
+      <div class="tseclabel">Dynamics</div>
+      <div class="trow">
+        <div class="tname">Bus compression</div>
+        <input type="range" class="tslider" id="t-buscomp" min="0" max="100" value="45">
+        <div class="tval" id="tv-buscomp">45%</div>
+      </div>
+      <div class="trow">
+        <div class="tname">Transient punch</div>
+        <input type="range" class="tslider" id="t-trans" min="0" max="100" value="55">
+        <div class="tval" id="tv-trans">55%</div>
+      </div>
+      <div class="trow">
+        <div class="tname">Parallel crush</div>
+        <input type="range" class="tslider" id="t-para" min="0" max="100" value="25">
+        <div class="tval" id="tv-para">25%</div>
+      </div>
+      <div class="ttr">
+        <div class="ttrname">Multi-band limiting</div>
+        <div class="tpill on" id="tp-mb" data-chain="cn-comp"></div>
+      </div>
+    </div>
+
+    <!-- Tonal Shape -->
+    <div class="tsec">
+      <div class="tseclabel">Tonal Shape</div>
+      <div class="trow">
+        <div class="tname">Low-end punch</div>
+        <input type="range" class="tslider tk" id="t-low" min="-20" max="20" value="3">
+        <div class="tval" id="tv-low">+3 dB</div>
+      </div>
+      <div class="trow">
+        <div class="tname">Mid presence</div>
+        <input type="range" class="tslider tk" id="t-mid" min="-12" max="12" value="-2">
+        <div class="tval" id="tv-mid">-2 dB</div>
+      </div>
+      <div class="trow">
+        <div class="tname">Air / sparkle</div>
+        <input type="range" class="tslider tk" id="t-air" min="-6" max="12" value="4">
+        <div class="tval" id="tv-air">+4 dB</div>
+      </div>
+      <div class="trow">
+        <div class="tname">Sub tightness</div>
+        <input type="range" class="tslider" id="t-sub" min="0" max="100" value="60">
+        <div class="tval" id="tv-sub">60%</div>
+      </div>
+    </div>
+
+    <!-- 5.1 Spatial -->
+    <div class="tsec">
+      <div class="tseclabel">5.1 Spatial</div>
+      <div class="trow">
+        <div class="tname">Stereo width</div>
+        <input type="range" class="tslider" id="t-width" min="60" max="140" value="100">
+        <div class="tval" id="tv-width">100%</div>
+      </div>
+      <div class="trow">
+        <div class="tname">Rear depth</div>
+        <input type="range" class="tslider" id="t-rear" min="0" max="100" value="40">
+        <div class="tval" id="tv-rear">40%</div>
+      </div>
+      <div class="trow">
+        <div class="tname">Room reverb (Ls/Rs)</div>
+        <input type="range" class="tslider" id="t-verb" min="0" max="100" value="30">
+        <div class="tval" id="tv-verb">30%</div>
+      </div>
+      <div class="trow">
+        <div class="tname">LFE crossover Hz</div>
+        <input type="range" class="tslider" id="t-lfe" min="60" max="120" value="80" step="5">
+        <div class="tval" id="tv-lfe">80 Hz</div>
+      </div>
+      <div class="ttr">
+        <div class="ttrname">Center channel boost</div>
+        <div class="tpill on" id="tp-ctr" data-chain="cn-eq"></div>
+      </div>
+      <div class="ttr">
+        <div class="ttrname">Haas effect on rears</div>
+        <div class="tpill" id="tp-haas" data-chain="cn-spatial"></div>
+      </div>
+    </div>
+
+    <div style="padding:8px 0 4px;font-size:10px;color:var(--text3);border-top:1px solid var(--border);margin-top:4px">
+      Applied automatically at stage 05 (dynamics & EQ).<br>
+      Changes take effect on next pipeline run.
+    </div>
+  </div>
+</div>
+
+<!-- Main Grid -->
+<div class="main-grid">
+  <!-- Left Panel -->
+  <div class="left-panel">
+    <div class="ph">Pipeline Stages</div>
+    <div class="stage-list" id="sl"></div>
+    
+    <div class="dz" id="dz">
+      <input type="file" accept=".wav,.flac,.aiff" id="fi">
+      <div style="font-size:20px;margin-bottom:5px">🎵</div>
+      <div>Drop Suno WAV here or click</div>
+      <div style="font-size:10px;margin-top:2px;color:var(--text3)">44.1 / 48 kHz · 16 / 24-bit stereo</div>
+      <div class="fname" id="fn"></div>
+    </div>
+    
+    <button class="run-btn" id="run-btn" disabled>▶ RUN FULL PIPELINE</button>
+    <button class="export-btn" id="export-btn">⬇ EXPORT FILES</button>
+    
+    <div class="cfg">
+      <div class="clabel">Pipeline Config</div>
+      <div class="crow">
+        <span class="ckey">Target loudness</span>
+        <select class="cval" id="cfg-lufs">
+          <option>-23 LUFS (EBU)</option>
+          <option>-27 LUFS (Netflix)</option>
+          <option>-14 LUFS (Streaming)</option>
+        </select>
+      </div>
+      <div class="crow">
+        <span class="ckey">Stem model</span>
+        <select class="cval" id="cfg-model">
+          <option>htdemucs_6s</option>
+          <option>htdemucs_ft</option>
+          <option>spleeter:5stems</option>
+        </select>
+      </div>
+      <div class="crow">
+        <span class="ckey">Silence gate</span>
+        <select class="cval" id="cfg-gate">
+          <option>-50 dBFS</option>
+          <option>-48 dBFS</option>
+          <option>-45 dBFS</option>
+        </select>
+      </div>
+      <div class="crow">
+        <span class="ckey">Output format</span>
+        <select class="cval" id="cfg-fmt">
+          <option>WAV 48k/24-bit</option>
+          <option>AC-3 640 kbps</option>
+          <option>DTS 1509 kbps</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Center Panel -->
+  <div class="center-panel">
+    <div class="sd" id="sd">
+      <div class="idle-state" id="idle">
+        <div class="idle-icon">⬡</div>
+        <div class="idle-title">Load a WAV file to begin</div>
+        <div class="idle-sub">
+          Fully automatic — track cutting · stem separation<br>
+          5.1 upmix · pro mastering · encode<br><br>
+          Use <strong style="color:var(--purple)">⚙ Studio Tuning</strong> to dial in the sound.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right-panel">
+    <div class="ph">Console Output</div>
+    <div class="clog" id="clog"></div>
+    <div class="meters" id="meters" style="display:none">
+      <div class="clabel">VU Meters</div>
+      <div id="mrows"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Application Scripts -->
+<script type="module" src="/js/app.js"></script>
+
+</body>
+</html>
