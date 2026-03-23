@@ -266,6 +266,13 @@ python tests/test_api.py
 
 ---
 
+## Changelog
+
+- **Spotify Genre Presets**: Added `spotify_pop`, `spotify_hiphop`, `spotify_rb`, `spotify_rock` to `constants.py` with custom dynamic control/EQ processing rules in `stage_05_studio_chain.py`.
+- **FLAC Output Support**: Modified `stage_06_loudness.py` and `stage_07_encode.py` to add bypass mechanisms for aggressive mastering presets when a lossless FLAC target format is requested.
+
+---
+
 ## Future Enhancements
 
 1. **Atmos Export** — Dolby Atmos renderer (requires separate license)

@@ -46,6 +46,16 @@ class Stage07Encode(PipelineStage):
         self.log("ok", f"  ✓ {ac3_path.name}  640 kbps Dolby  ({size_mb:.1f} MB)")
         self.exported_files.append({"path": str(ac3_path), "format": "AC-3 640k", "size_mb": size_mb})
 
+        # Export FLAC if configured
+        output_format_str = context.get("config", {}).get("output_format", "")
+        if "flac" in output_format_str.lower():
+            flac_path = output_dir / "output_51.flac"
+            self.log("cmd", f"$ ffmpeg -i norm.wav -c:a flac {flac_path.name}")
+            await self._export_flac(input_path, flac_path)
+            size_mb = os.path.getsize(str(flac_path)) / 1024 / 1024 if flac_path.exists() else 0
+            self.log("ok", f"  ✓ {flac_path.name}  FLAC 5.1 Lossless  ({size_mb:.1f} MB)")
+            self.exported_files.append({"path": str(flac_path), "format": "FLAC 5.1", "size_mb": size_mb})
+
         # Export DTS
         dts_path = output_dir / "output_51.dts"
         self.log("cmd", "$ ffmpeg -i norm.wav -c:a dts -b:a 1509k output_51.dts")
@@ -106,6 +116,22 @@ class Stage07Encode(PipelineStage):
         
         if process.returncode != 0:
             logger.error(f"AC-3 export failed: {stderr.decode()}")
+
+    async def _export_flac(self, input_path: Path, output_path: Path):
+        """Export FLAC"""
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", str(input_path),
+            "-c:a", "flac",
+            str(output_path),
+        ]
+        process = await asyncio.create_subprocess_exec(
+            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await process.communicate()
+        
+        if process.returncode != 0:
+            logger.error(f"FLAC export failed: {stderr.decode()}")
 
     async def _export_dts(self, input_path: Path, output_path: Path):
         """Export DTS"""

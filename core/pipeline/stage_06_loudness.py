@@ -27,7 +27,20 @@ class Stage06Loudness(PipelineStage):
 
     async def execute(self, input_path: Path, context: Dict[str, Any]) -> Path:
         self.status = "running"
-        target_lufs = context.get("config", {}).get("target_lufs", -14.0)  # Spotify default
+        
+        studio_config = context.get("studio_config", {})
+        preset_lufs = studio_config.get("target_lufs")
+        
+        output_format = context.get("config", {}).get("output_format", "wav_48k_24bit")
+        is_flac = "flac" in output_format.lower()
+        
+        if is_flac and preset_lufs is not None:
+            self.log("info", "  [FORMAT] FLAC detected: bypassing aggressive Spotify LUFS target")
+            target_lufs = context.get("config", {}).get("target_lufs", -14.0)
+        else:
+            target_lufs = preset_lufs if preset_lufs is not None else context.get("config", {}).get("target_lufs", -14.0)
+            
+        tp_limit_db = studio_config.get("true_peak", -1.0)
 
         self.log("cmd", "$ ffmpeg -i output_51_eq.wav -af ebur128=framelog=verbose -f null -")
 
@@ -60,7 +73,7 @@ class Stage06Loudness(PipelineStage):
 
         # Apply normalization
         output_path = input_path.parent / "output_51_norm.wav"
-        await self._normalize(data, output_path, sr, makeup_gain)
+        await self._normalize(data, output_path, sr, makeup_gain, tp_limit_db)
 
         # Verify final loudness
         final_data, _ = sf.read(str(output_path))
@@ -152,7 +165,7 @@ class Stage06Loudness(PipelineStage):
             return 10 * np.log10(total_energy + 1e-10)
         return -70
 
-    async def _normalize(self, data: np.ndarray, output_path: Path, sr: int, gain_db: float):
+    async def _normalize(self, data: np.ndarray, output_path: Path, sr: int, gain_db: float, tp_limit_db: float = -1.0):
         """Apply loudness normalization"""
         # Convert dB to linear gain
         gain_linear = 10 ** (gain_db / 20)
@@ -162,8 +175,10 @@ class Stage06Loudness(PipelineStage):
         
         # True-peak limiting
         max_tp = np.max(np.abs(normalized))
-        if max_tp > 0.891:  # -1.0 dBTP true peak limit (Spotify spec: 10^(-1/20) = 0.891)
-            normalized *= 0.891 / max_tp
+        tp_linear = 10 ** (tp_limit_db / 20)
+        
+        if max_tp > tp_linear:
+            normalized *= tp_linear / max_tp
         
         # Write output
         sf.write(str(output_path), normalized, sr)

@@ -135,7 +135,7 @@ class App {
     try {
       // Get configuration
       const config = {
-        target_lufs: parseFloat(this.getConfigValue('cfg-lufs', '-23.0')),
+        target_lufs: parseFloat(this.getConfigValue('cfg-lufs', '-14.0')),
         stem_model: this.getConfigValue('cfg-model', 'htdemucs_6s'),
         silence_gate: parseInt(this.getConfigValue('cfg-gate', '-50')),
         output_format: this.getConfigValue('cfg-fmt', 'wav_48k_24bit'),
@@ -171,7 +171,15 @@ class App {
         
         if (!status.is_running) {
           clearInterval(pollInterval);
-          this.onPipelineComplete(status);
+          const failedStage = status.stages && status.stages.find(s => s.status === 'error');
+          if (failedStage) {
+            this.log('err', `Pipeline failed at stage ${failedStage.stage_num}: ${failedStage.name}`);
+            this.isRunning = false;
+            const runBtn = document.getElementById('run-btn');
+            if (runBtn) { runBtn.disabled = false; runBtn.textContent = '▶ RUN FULL PIPELINE'; }
+          } else {
+            this.onPipelineComplete(status);
+          }
         }
       } catch (error) {
         console.error('Poll error:', error);

@@ -61,8 +61,11 @@ class Stage02TrackCut(PipelineStage):
         return tracks_dir
 
     async def _load_audio(self, path: Path):
-        """Load audio file"""
-        data, sr = sf.read(str(path))
+        """Load audio file — runs in executor to avoid blocking the event loop"""
+        if not path.exists():
+            raise FileNotFoundError(f"Audio file not found: {path}")
+        loop = asyncio.get_event_loop()
+        data, sr = await loop.run_in_executor(None, sf.read, str(path))
         return data, sr
 
     def _compute_rms_envelope(self, data: np.ndarray, sr: int, window_ms: int = 10) -> np.ndarray:

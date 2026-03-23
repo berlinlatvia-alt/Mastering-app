@@ -58,6 +58,12 @@ class PipelineManager:
             raise RuntimeError("Pipeline is already running")
 
         self.is_running = True
+        self.current_stage = 0
+        # Reset all stage states for a clean run
+        for stage in self.stages:
+            stage.progress = 0.0
+            stage.status = "pending"
+            stage.logs = []
         self.context["output_dir"] = output_dir
         self.context["input_path"] = input_path
 
@@ -90,6 +96,10 @@ class PipelineManager:
 
         except Exception as e:
             logger.error(f"Pipeline failed: {e}", exc_info=True)
+            # Mark the failing stage as error so the UI shows where it broke
+            if self.current_stage < len(self.stages):
+                self.stages[self.current_stage].status = "error"
+                self.stages[self.current_stage].log("err", f"  ✗ stage failed: {e}")
             return {"status": "error", "error": str(e), "stage": self.current_stage}
 
         finally:

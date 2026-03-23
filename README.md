@@ -218,6 +218,13 @@ Following **DOGE Mode** standards:
 
 ---
 
+## Changelog
+
+- **Added Spotify Genre Presets**: Pop, Hip-Hop, R&B, and Rock configurations strictly targeting Spotify's streaming LUFS/TP standards with genre-specific mastering chain settings (multi-band compression, tailored EQ, hard clipping).
+- **FLAC Lossless Output Support**: FLAC 5.1 export option is natively supported in the UI, which intentionally bypasses Spotify's aggressive loudness targeting rules in Stage 06 to preserve full dynamic range.
+
+---
+
 ## License
 
 MIT License — See LICENSE file

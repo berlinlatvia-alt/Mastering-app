@@ -65,6 +65,18 @@
         <div class="pchip" data-p="cinematic" onclick="window.app.tuningUI.applyPreset('cinematic',this)">
           <span class="picon">🎬</span>Cinematic
         </div>
+        <div class="pchip" data-p="spotify_pop" onclick="window.app.tuningUI.applyPreset('spotify_pop',this)">
+          <span class="picon">🟢</span>Spotify Pop
+        </div>
+        <div class="pchip" data-p="spotify_hiphop" onclick="window.app.tuningUI.applyPreset('spotify_hiphop',this)">
+          <span class="picon">🟢</span>Spotify Hip-Hop
+        </div>
+        <div class="pchip" data-p="spotify_rb" onclick="window.app.tuningUI.applyPreset('spotify_rb',this)">
+          <span class="picon">🟢</span>Spotify R&B
+        </div>
+        <div class="pchip" data-p="spotify_rock" onclick="window.app.tuningUI.applyPreset('spotify_rock',this)">
+          <span class="picon">🟢</span>Spotify Rock
+        </div>
       </div>
     </div>
 
@@ -227,9 +239,9 @@
       <div class="crow">
         <span class="ckey">Target loudness</span>
         <select class="cval" id="cfg-lufs">
+          <option selected>-14 LUFS (Streaming)</option>
           <option>-23 LUFS (EBU)</option>
           <option>-27 LUFS (Netflix)</option>
-          <option>-14 LUFS (Streaming)</option>
         </select>
       </div>
       <div class="crow">
@@ -252,6 +264,7 @@
         <span class="ckey">Output format</span>
         <select class="cval" id="cfg-fmt">
           <option>WAV 48k/24-bit</option>
+          <option>FLAC 5.1 Lossless</option>
           <option>AC-3 640 kbps</option>
           <option>DTS 1509 kbps</option>
         </select>

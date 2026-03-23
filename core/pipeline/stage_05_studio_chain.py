@@ -62,12 +62,31 @@ class Stage05StudioChain(PipelineStage):
 
         # Bus compression
         comp_val = config.get("buscomp", 45)
-        ratio = 1 + (comp_val / 100) * 7  # 1:1 to 8:1
-        self.log("info", f"  [COMP] {ratio:.0f}:1 attack 10ms release 100ms  GR avg −2.4 dB")
+        ratio = config.get("comp_ratio", 1 + (comp_val / 100) * 7)  # 1:1 to 8:1
+        attack = config.get("comp_attack", 0.01)
+        release = config.get("comp_release", 0.1)
+        self.log("info", f"  [COMP] {ratio:.1f}:1 attack {attack*1000:.0f}ms release {release*1000:.0f}ms")
         
         for ch in range(6):
-            data[:, ch] = self._compress(data[:, ch], ratio, 0.01, 0.1, sr)
+            data[:, ch] = self._compress(data[:, ch], ratio, attack, release, sr)
         await asyncio.sleep(0.1)
+        
+        # Genre specific advanced processing
+        if config.get("mb_lowmid_comp"):
+            self.log("info", "  [EQ] multi-band style control on low-mids")
+            for ch in range(6):
+                data[:, ch] = self._peak_notch(data[:, ch], 350, sr, -2.0, 1.5)
+        
+        if config.get("eq_cut_34k"):
+            self.log("info", "  [EQ] cut harsh 3-4kHz range")
+            for ch in range(6):
+                data[:, ch] = self._peak_notch(data[:, ch], 3500, sr, -2.0, 2.0)
+                
+        if config.get("eq_boost_25k"):
+            self.log("info", "  [EQ] boost 2-5kHz vocal/guitar aggression")
+            for ch in range(6):
+                if ch < 3: # L, R, C
+                    data[:, ch] = self._peak_notch(data[:, ch], 3500, sr, 2.0, 1.0)
 
         # EQ tonal shape
         low = config.get("low", 3)
@@ -95,6 +114,21 @@ class Stage05StudioChain(PipelineStage):
         self.log("info", "  [Ls/Rs] shelf −4 dB @ 12 kHz")
         for ch in [4, 5]:  # Ls, Rs
             data[:, ch] = self._high_shelf(data[:, ch], 12000, sr, -4)
+
+        # Genre specific transient / master clipping
+        if config.get("tape_saturate_loudness"):
+            self.log("info", "  [COLOR] tube/tape saturation for loudness")
+            for ch in range(6):
+                data[:, ch] = self._tape_saturation(data[:, ch], 0.6)
+                
+        if config.get("tape_drive_master"):
+            self.log("info", "  [COLOR] drive master into tape to shave spiky transients")
+            for ch in range(6):
+                data[:, ch] = self._tape_saturation(data[:, ch], 0.8)
+                
+        if config.get("hard_clip_drums"):
+            self.log("info", "  [DYN] hard clip transients before final limiting")
+            data = np.clip(data, -0.85, 0.85)
 
         # Normalize to prevent clipping
         max_val = np.max(np.abs(data))

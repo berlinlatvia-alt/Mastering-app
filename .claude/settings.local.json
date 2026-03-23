@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python backend/main.py)",
+      "Bash(taskkill /F /IM python.exe)",
+      "Bash(taskkill /F /IM uvicorn.exe)",
+      "Bash(cmd /c \"taskkill /F /IM python.exe\")",
+      "Bash(cmd /c \"taskkill /F /IM python.exe 2>&1 & taskkill /F /IM python3.exe 2>&1 & echo DONE\")",
+      "Bash(cmd /c \"netstat -ano | findstr :8000\")",
+      "Bash(python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000)",
+      "Bash(python stress_test.py)",
+      "Bash(cmd /c \"wmic process where name=''python.exe'' get processid,commandline 2>&1\")",
+      "Bash(cmd /c \"wmic process where \"\"name=''python.exe''\"\" get ProcessId,CommandLine\")",
+      "Bash(powershell -Command \"Get-Process python* | Select-Object Id, Name, CPU | Format-Table -AutoSize\")",
+      "Bash(powershell -Command \"Stop-Process -Id 42648 -Force; Write-Host ''Killed 42648''\")",
+      "Bash(powershell -Command \"Get-Process python* 2>$null | Select-Object Id, Name | Format-Table -AutoSize; Write-Host ''Done''\")",
+      "Bash(powershell -Command \"Get-Process python -ErrorAction SilentlyContinue | Format-Table Id, Name -AutoSize; Write-Host ''Done''\")",
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri ''http://127.0.0.1:8000/api/status'' -UseBasicParsing | Select-Object StatusCode, Content\")",
+      "Bash(python -X utf8 stress_test.py)",
+      "Read(//mnt/c/Users/smmgo/**)",
+      "Read(//c/Users/smmgo/Documents/**)",
+      "Bash(find /mnt/c/Users/smmgo/Documents -maxdepth 2 -name *.git -o -name CLAUDE.md)",
+      "Bash(cmd.exe /c \"cd /d \"\"C:\\\\Users\\\\smmgo\\\\Documents\\\\Generation Null Mastering app\"\" && git status && git log --oneline -5\")",
+      "Bash(cmd.exe /c \"cd /d \"\"C:\\\\Users\\\\smmgo\\\\Documents\\\\Generation Null\\\\Mastering app\"\" && git status && echo --- && git log --oneline -5\")",
+      "Bash(cmd.exe /c \"cd /d \"\"C:\\\\Users\\\\smmgo\\\\Documents\\\\Generation Null\\\\Mastering app\"\" 2>&1 && git status 2>&1\")",
+      "Bash(cmd.exe /c \"cd /d \"\"C:\\\\Users\\\\smmgo\\\\Documents\\\\Generation Null\\\\Mastering app\"\" & git status\")",
+      "Bash(echo \"exit: $?\")",
+      "Bash(curl -s http://127.0.0.1:8000/api/status)"
+    ]
+  }
+}

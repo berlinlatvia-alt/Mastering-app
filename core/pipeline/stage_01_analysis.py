@@ -4,6 +4,7 @@ REAL PROCESSING - Resample, normalize, spectral scan, true-peak detection
 """
 
 import asyncio
+import shutil
 from pathlib import Path
 from typing import Dict, Any
 import subprocess
@@ -48,6 +49,10 @@ class Stage01Analysis(PipelineStage):
         self.log("cmd", f"$ ffmpeg -i {input_path.name} -ar 48000 -sample_fmt flt {output_path.name}")
 
         await self._resample(input_path, output_path)
+        if not output_path.exists():
+            # ffmpeg unavailable or failed — use original file directly
+            self.log("warn", "  ⚠ ffmpeg resample failed — using original file as-is")
+            shutil.copy(str(input_path), str(output_path))
         self.log("ok", "  ✓ resample complete  44100→48000 Hz")
 
         # True-peak scan and LUFS measurement

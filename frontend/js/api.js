@@ -25,12 +25,19 @@ export class API {
       if (!response.ok) {
         const error = await response.json().catch(() => ({ detail: response.statusText }));
         const detail = error.detail;
-        const message = Array.isArray(detail)
-          ? detail.map(e => e.msg || JSON.stringify(e)).join(', ')
-          : (detail || `HTTP ${response.status}`);
+        let message;
+        if (Array.isArray(detail)) {
+          message = detail.map(e => e.msg || JSON.stringify(e)).join(', ');
+        } else if (typeof detail === 'string') {
+          message = detail;
+        } else if (detail) {
+          message = JSON.stringify(detail);
+        } else {
+          message = `HTTP ${response.status}`;
+        }
         throw new Error(message);
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error(`API Error [${endpoint}]:`, error);
