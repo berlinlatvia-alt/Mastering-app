@@ -112,6 +112,7 @@ class PipelineManager:
             "current_stage": self.current_stage,
             "stages": [s.to_dict() for s in self.stages],
             "context_keys": list(self.context.keys()),
+            "exported_files": self.context.get("exported_files", []),
         }
 
     def reset(self):

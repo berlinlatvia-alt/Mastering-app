@@ -69,7 +69,7 @@ class Stage06Loudness(PipelineStage):
         self.log("info", f"  integrated loudness: {integrated_lufs:.1f} LUFS")
         self.log("info", f"  applying makeup: {makeup_gain:+.1f} dB → {target_lufs:.1f} LUFS target")
         
-        await asyncio.sleep(0.3)
+        await asyncio.sleep(0.02)
 
         # Apply normalization
         output_path = input_path.parent / "output_51_norm.wav"

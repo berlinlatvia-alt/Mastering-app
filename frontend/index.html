@@ -31,6 +31,7 @@
       <span id="stxt">IDLE</span>
     </div>
   </div>
+  <button class="topbar-btn" id="guide-btn" style="margin-right:5px;border-color:var(--blue);color:var(--blue)">📖 Guide</button>
   <button class="topbar-btn" id="tune-btn">⚙ Studio Tuning</button>
 </div>
 
@@ -61,6 +62,12 @@
         </div>
         <div class="pchip" data-p="hiphop" onclick="window.app.tuningUI.applyPreset('hiphop',this)">
           <span class="picon">🎧</span>Hip-Hop
+        </div>
+        <div class="pchip" data-p="rnb" onclick="window.app.tuningUI.applyPreset('rnb',this)">
+          <span class="picon">🎵</span>R&amp;B
+        </div>
+        <div class="pchip" data-p="afrobeats" onclick="window.app.tuningUI.applyPreset('afrobeats',this)">
+          <span class="picon">🥁</span>Afrobeats
         </div>
         <div class="pchip" data-p="cinematic" onclick="window.app.tuningUI.applyPreset('cinematic',this)">
           <span class="picon">🎬</span>Cinematic
@@ -232,41 +239,94 @@
     </div>
     
     <button class="run-btn" id="run-btn" disabled>▶ RUN FULL PIPELINE</button>
+    <button class="cutter-toggle-btn" id="cutter-toggle-btn" style="display:none" onclick="window.app.trackCutter.toggle()">✂ Track Cutting</button>
     <button class="export-btn" id="export-btn">⬇ EXPORT FILES</button>
-    
+    <button class="export-btn" id="archive-btn" style="background:var(--accent2,#2a7a4b)" onclick="window.app.downloadArchive()">🗜 DOWNLOAD ALL (ZIP)</button>
+
+    <!-- Download Directory Configuration (shown after pipeline complete) -->
+    <div class="download-dir-config" id="download-dir-config" style="display:none">
+      <div class="clabel">📁 Download Directory</div>
+      <div class="download-dir-row">
+        <input type="text" class="download-dir-input" id="download-dir-path" placeholder="Default: app/output" readonly>
+        <button class="download-dir-btn" onclick="window.app.browseDownloadDir()">Browse</button>
+        <button class="download-dir-btn" onclick="window.app.resetDownloadDir()">Reset</button>
+      </div>
+      <div class="download-dir-note" style="font-size:9px;color:var(--text3);margin-top:4px">Files saved here after processing</div>
+    </div>
+
     <div class="cfg">
-      <div class="clabel">Pipeline Config</div>
-      <div class="crow">
-        <span class="ckey">Target loudness</span>
-        <select class="cval" id="cfg-lufs">
-          <option selected>-14 LUFS (Streaming)</option>
-          <option>-23 LUFS (EBU)</option>
-          <option>-27 LUFS (Netflix)</option>
-        </select>
+      <!-- Mode Tab Switcher -->
+      <div class="mode-tabs">
+        <button class="mode-tab active" id="tab-basic" onclick="window.switchMode('basic')">🟢 Basic</button>
+        <button class="mode-tab" id="tab-pro" onclick="window.switchMode('pro')">⚙ Pro</button>
       </div>
-      <div class="crow">
-        <span class="ckey">Stem model</span>
-        <select class="cval" id="cfg-model">
-          <option>htdemucs_6s</option>
-          <option>htdemucs_ft</option>
-          <option>spleeter:5stems</option>
-        </select>
+
+      <!-- BASIC MODE -->
+      <div id="cfg-basic">
+        <!-- Platform buttons -->
+        <div class="clabel" style="margin-top:8px">Platform</div>
+        <div class="platform-grid" id="platform-grid">
+          <button class="plat-btn active" data-platform="spotify">🟢 Spotify</button>
+          <button class="plat-btn" data-platform="youtube">▶ YouTube</button>
+          <button class="plat-btn" data-platform="lossless">💿 Lossless</button>
+        </div>
+
+        <!-- Genre chips -->
+        <div class="clabel" style="margin-top:8px">Genre</div>
+        <div class="genre-chip-grid" id="genre-chip-grid">
+          <button class="genre-chip active" data-genre="pop">🎤 Pop</button>
+          <button class="genre-chip" data-genre="hiphop">🎧 Hip-Hop</button>
+          <button class="genre-chip" data-genre="rock">🎸 Rock</button>
+          <button class="genre-chip" data-genre="electronic">🎛 Electronic</button>
+          <button class="genre-chip" data-genre="jazz">🎷 Jazz</button>
+          <button class="genre-chip" data-genre="rnb">🎵 R&amp;B</button>
+          <button class="genre-chip" data-genre="afrobeats">🥁 Afrobeats</button>
+          <button class="genre-chip" data-genre="cinematic">🎬 Film</button>
+        </div>
       </div>
-      <div class="crow">
-        <span class="ckey">Silence gate</span>
-        <select class="cval" id="cfg-gate">
-          <option>-50 dBFS</option>
-          <option>-48 dBFS</option>
-          <option>-45 dBFS</option>
-        </select>
+
+      <!-- PRO MODE (hidden by default) -->
+      <div id="cfg-advanced" style="display:none">
+        <div class="crow" style="margin-top:8px">
+          <span class="ckey">Target loudness</span>
+          <select class="cval" id="cfg-lufs">
+            <option value="-14.0" selected>-14 LUFS (Streaming)</option>
+            <option value="-23.0">-23 LUFS (EBU)</option>
+            <option value="-27.0">-27 LUFS (Netflix)</option>
+          </select>
+        </div>
+        <div class="crow">
+          <span class="ckey">Stem model</span>
+          <select class="cval" id="cfg-model">
+            <option value="htdemucs_6s">htdemucs_6s (Best)</option>
+            <option value="htdemucs_ft">htdemucs_ft (Fast)</option>
+            <option value="spleeter:5stems">spleeter (Legacy)</option>
+          </select>
+        </div>
+        <div class="crow">
+          <span class="ckey">Auto-detect silence</span>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="cfg-auto-silence" onchange="document.getElementById('cfg-gate-row').style.display=this.checked?'':'none'">
+            <span style="font-size:10px;color:var(--text3)">Off by default for Suno tracks</span>
+          </label>
+        </div>
+        <div class="crow" id="cfg-gate-row" style="display:none">
+          <span class="ckey">Silence gate</span>
+          <select class="cval" id="cfg-gate">
+            <option value="-50">-50 dBFS</option>
+            <option value="-48">-48 dBFS</option>
+            <option value="-45">-45 dBFS</option>
+          </select>
+        </div>
       </div>
-      <div class="crow">
-        <span class="ckey">Output format</span>
+
+      <!-- Output always visible -->
+      <div class="crow" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        <span class="ckey">Output</span>
         <select class="cval" id="cfg-fmt">
-          <option>WAV 48k/24-bit</option>
-          <option>FLAC 5.1 Lossless</option>
-          <option>AC-3 640 kbps</option>
-          <option>DTS 1509 kbps</option>
+          <option value="wav_48k_24bit">WAV 48k/24-bit</option>
+          <option value="mp3_320">MP3 320 kbps</option>
+          <option value="flac">FLAC Lossless</option>
         </select>
       </div>
     </div>
@@ -294,6 +354,164 @@
     <div class="meters" id="meters" style="display:none">
       <div class="clabel">VU Meters</div>
       <div id="mrows"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal-ov" id="help-modal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-c">
+    <div class="modal-h">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase">⬡ PRO STARTUP GUIDE</span>
+      </div>
+      <button class="tdclose" onclick="document.getElementById('help-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-b">
+
+      <!-- Section 1 -->
+      <div class="guide-sec">
+        <div class="guide-sec-header">
+          <span class="guide-num">01</span>
+          <span class="guide-title">Stem Separation</span>
+          <span class="guide-tag" style="color:var(--teal);border-color:var(--teal-dim)">AI Brain</span>
+        </div>
+        <p class="guide-desc">Before 5.1 upmixing, the AI splits your stereo track into isolated instrument layers called <em>stems</em>.</p>
+        <div class="guide-items">
+          <div class="guide-item">
+            <span class="gi-key">htdemucs_6s</span>
+            <span class="gi-badge" style="background:var(--teal-dim);color:var(--teal)">Recommended</span>
+            <span class="gi-desc">6 stems · Vocals / Drums / Bass / Guitar / Piano / Other</span>
+          </div>
+          <div class="guide-item">
+            <span class="gi-key">htdemucs_ft</span>
+            <span class="gi-badge" style="background:var(--blue-dim);color:var(--blue)">Fast</span>
+            <span class="gi-desc">Quicker render, slightly lower quality</span>
+          </div>
+          <div class="guide-item">
+            <span class="gi-key">spleeter</span>
+            <span class="gi-badge" style="background:var(--bg4);color:var(--muted)">Legacy</span>
+            <span class="gi-desc">4–5 stems, compatible with older hardware</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="guide-sec">
+        <div class="guide-sec-header">
+          <span class="guide-num">02</span>
+          <span class="guide-title">Studio Tuning</span>
+          <span class="guide-tag" style="color:var(--purple);border-color:var(--purple-dim)">Analog Color</span>
+        </div>
+        <p class="guide-desc">Adds <em>analog flavor</em> — simulates real hardware circuitry to warm up digital audio.</p>
+        <div class="guide-items">
+          <div class="guide-item">
+            <span class="gi-key">SSL 4000 G</span>
+            <span class="gi-desc">Punchy, forward sound · Best for Rock / Pop</span>
+          </div>
+          <div class="guide-item">
+            <span class="gi-key">Neve 1073</span>
+            <span class="gi-desc">Warm vintage harmonics · Best for Vocals / Acoustic</span>
+          </div>
+          <div class="guide-item">
+            <span class="gi-key">Tape Saturation</span>
+            <span class="gi-desc">Makes digital audio feel organic and "alive"</span>
+          </div>
+          <div class="guide-item">
+            <span class="gi-key">Bus Compression</span>
+            <span class="gi-desc">"Glues" the mix — makes it sound like one cohesive record</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="guide-sec">
+        <div class="guide-sec-header">
+          <span class="guide-num">03</span>
+          <span class="guide-title">Loudness (LUFS)</span>
+          <span class="guide-tag" style="color:var(--amber);border-color:var(--amber-dim)">Normalization</span>
+        </div>
+        <p class="guide-desc">LUFS = the platform's volume standard. Too loud → clipped. Too quiet → sounds weak in a playlist.</p>
+        <div class="guide-items">
+          <div class="guide-item">
+            <span class="gi-key">−14 LUFS</span>
+            <span class="gi-badge" style="background:rgba(45,212,160,.12);color:var(--teal)">Spotify · YouTube</span>
+            <span class="gi-desc">Industry streaming standard</span>
+          </div>
+          <div class="guide-item">
+            <span class="gi-key">−23 LUFS</span>
+            <span class="gi-badge" style="background:var(--blue-dim);color:var(--blue)">EBU R128</span>
+            <span class="gi-desc">Broadcast / film / Netflix standard</span>
+          </div>
+          <div class="guide-item">
+            <span class="gi-key">FLAC Lossless</span>
+            <span class="gi-desc">Skips aggressive normalization — preserves full dynamic range</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4 -->
+      <div class="guide-sec">
+        <div class="guide-sec-header">
+          <span class="guide-num">04</span>
+          <span class="guide-title">5.1 Spatial Routing</span>
+          <span class="guide-tag" style="color:var(--blue);border-color:var(--blue-dim)">Surround</span>
+        </div>
+        <p class="guide-desc">6-channel surround layout. Each stem is routed to the appropriate speaker.</p>
+        <div class="guide-items">
+          <div class="guide-item">
+            <span class="gi-key">L / R</span>
+            <span class="gi-desc">Front left / right — main stereo mix</span>
+          </div>
+          <div class="guide-item">
+            <span class="gi-key">C</span>
+            <span class="gi-desc">Center channel — lead vocals, for clarity in home theater</span>
+          </div>
+          <div class="guide-item">
+            <span class="gi-key">Ls / Rs</span>
+            <span class="gi-desc">Rear speakers — atmospheres, reverb tails, backing layers</span>
+          </div>
+          <div class="guide-item">
+            <span class="gi-key">LFE (.1)</span>
+            <span class="gi-badge" style="background:var(--red-dim);color:var(--red)">Sub</span>
+            <span class="gi-desc">Subwoofer — bass frequencies below crossover Hz</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Track Cutter Panel (Inline) -->
+<div class="cutter-container" id="cutter-container" style="display:none">
+  <div class="cutter-panel" id="cutter-panel">
+    <div class="cutter-header">
+      <div>
+        <div class="cutter-title">✂ Manual Track Cutting</div>
+        <div class="cutter-subtitle">Click on waveform to add cut points · Drag to adjust · Click existing point to remove</div>
+      </div>
+      <div class="cutter-actions">
+        <button class="cutter-btn cutter-btn-secondary" onclick="window.app.trackCutter.autoDetectSilence(-50, 0.8)">🔍 Auto-Detect</button>
+        <button class="cutter-btn cutter-btn-secondary" onclick="window.app.trackCutter.clearCutPoints()">✕ Clear</button>
+        <button class="cutter-btn cutter-btn-primary" onclick="window.app.trackCutter.saveAndContinue()">✓ Apply & Run Pipeline</button>
+        <button class="cutter-btn cutter-btn-ghost" onclick="window.app.trackCutter.hide()">✕ Hide</button>
+      </div>
+    </div>
+    
+    <div class="cutter-body">
+      <div class="cutter-waveform-container">
+        <canvas id="waveform-canvas"></canvas>
+      </div>
+      
+      <div class="cutter-controls">
+        <button class="cutter-play-btn" id="waveform-play-btn" onclick="window.app.trackCutter.togglePlay()">▶ Play</button>
+        <div class="cutter-time-display" id="current-time">00:00.0</div>
+      </div>
+      
+      <div class="cutter-list-container" id="cut-points-list">
+        <!-- Cut points list will be rendered here -->
+      </div>
     </div>
   </div>
 </div>

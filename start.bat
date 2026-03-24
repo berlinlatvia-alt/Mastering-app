@@ -36,11 +36,25 @@ REM Start server
 echo.
 echo ========================================
 echo   5.1 AutoMaster - Suno to Surround
-echo   http://127.0.0.1:8000
 echo ========================================
 echo.
 
 cd /d "%~dp0"
-python backend\main.py
+
+:: Delete old port file
+if exist .port del .port
+
+:: Start server in background (it writes .port when ready)
+start /B python backend\main.py
+
+:: Wait for .port file (server is ready)
+:wait
+timeout /t 1 /nobreak >nul
+if not exist .port goto wait
+
+:: Read port and open browser
+set /p PORT=<.port
+echo Server running on http://127.0.0.1:%PORT%
+start "" http://127.0.0.1:%PORT%
 
 pause

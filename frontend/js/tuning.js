@@ -52,6 +52,12 @@ export class TuningUI {
         this.sendConfig();
       });
     }
+
+    // Overlay click
+    const overlay = document.getElementById('tov');
+    if (overlay) {
+      overlay.addEventListener('click', () => this.close());
+    }
   }
 
   async loadPresets() {
@@ -66,6 +72,8 @@ export class TuningUI {
         electronic: { tape: 10, harm: 5, buscomp: 55, trans: 80, para: 50, low: 8, mid: -4, air: 8, sub: 85, width: 130, rear: 55, verb: 25, lfe: 90 },
         jazz: { tape: 45, harm: 30, buscomp: 25, trans: 30, para: 10, low: 1, mid: 1, air: 3, sub: 40, width: 90, rear: 50, verb: 55, lfe: 70 },
         hiphop: { tape: 25, harm: 35, buscomp: 70, trans: 85, para: 60, low: 9, mid: -3, air: 5, sub: 90, width: 105, rear: 30, verb: 15, lfe: 100 },
+        rnb: { tape: 45, harm: 30, buscomp: 25, trans: 40, para: 15, low: 4, mid: 0, air: 3, sub: 65, width: 110, rear: 50, verb: 40, lfe: 85 },
+        afrobeats: { tape: 40, harm: 40, buscomp: 55, trans: 65, para: 45, low: 7, mid: 2, air: 4, sub: 75, width: 100, rear: 45, verb: 30, lfe: 90 },
         cinematic: { tape: 50, harm: 25, buscomp: 35, trans: 45, para: 20, low: 4, mid: -1, air: 6, sub: 65, width: 120, rear: 70, verb: 65, lfe: 80 },
       };
     }
@@ -104,7 +112,10 @@ export class TuningUI {
     this.currentPreset = presetName;
     const preset = this.presets[presetName];
 
-    if (!preset) return;
+    if (!preset) {
+        console.warn(`Preset not found: ${presetName}`);
+        return;
+    }
 
     // Update sliders
     Object.entries(preset).forEach(([key, value]) => {

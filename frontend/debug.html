@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5.1 AutoMaster - Debug Console</title>
+  <style>
+    body {
+      background: #0d0e10;
+      color: #d8dce8;
+      font-family: 'IBM Plex Mono', monospace;
+      padding: 20px;
+      margin: 0;
+    }
+    .log {
+      background: #1a1d24;
+      border: 1px solid #2a2d36;
+      border-radius: 4px;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 12px;
+    }
+    .ok { color: #2dd4a0; }
+    .err { color: #e85050; }
+    .warn { color: #e8a030; }
+    .info { color: #5b9cf6; }
+    button {
+      background: #2dd4a0;
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+      font-family: inherit;
+    }
+    button:hover { background: #20b88a; }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #13151a;
+      border-radius: 6px;
+    }
+    h2 { margin-top: 0; color: #2dd4a0; }
+    pre {
+      background: #0a0b0d;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 5.1 AutoMaster - Debug Console</h1>
+  
+  <div class="test-section">
+    <h2>1. API Connectivity</h2>
+    <button onclick="testAPI()">Test API Status</button>
+    <button onclick="testHardware()">Test Hardware</button>
+    <button onclick="testPresets()">Test Presets</button>
+    <div id="api-log" class="log">Click buttons to test API...</div>
+  </div>
+  
+  <div class="test-section">
+    <h2>2. Download Test</h2>
+    <button onclick="testDownload()">Test Download Endpoint</button>
+    <div id="download-log" class="log">Click to test download...</div>
+  </div>
+  
+  <div class="test-section">
+    <h2>3. Track Cutter</h2>
+    <button onclick="testTrackCutter()">Test Track Cutter UI</button>
+    <div id="cutter-log" class="log">Click to test track cutter...</div>
+  </div>
+  
+  <div class="test-section">
+    <h2>4. File Upload Test</h2>
+    <input type="file" id="test-file" accept="audio/*">
+    <button onclick="testUpload()">Test Upload</button>
+    <div id="upload-log" class="log">Select file and click to test upload...</div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Console Output</h2>
+    <pre id="console-output"></pre>
+  </div>
+
+  <script type="module">
+    const API_BASE = 'http://127.0.0.1:8000/api';
+    
+    function log(element, type, message) {
+      const el = document.getElementById(element);
+      const className = type === 'error' ? 'err' : type === 'warn' ? 'warn' : type === 'ok' ? 'ok' : 'info';
+      el.innerHTML += `<div class="${className}">[${new Date().toLocaleTimeString()}] ${message}</div>`;
+      el.scrollTop = el.scrollHeight;
+    }
+    
+    function consoleLog(msg) {
+      const el = document.getElementById('console-output');
+      el.textContent += msg + '\n';
+      el.scrollTop = el.scrollHeight;
+    }
+    
+    window.testAPI = async function() {
+      try {
+        const res = await fetch(`${API_BASE}/status`);
+        const data = await res.json();
+        log('api-log', 'ok', `✓ API Status: ${res.status}`);
+        consoleLog('API Status:', JSON.stringify(data, null, 2));
+      } catch (e) {
+        log('api-log', 'err', `✗ API Error: ${e.message}`);
+        consoleLog('API Error:', e.message);
+      }
+    };
+    
+    window.testHardware = async function() {
+      try {
+        const res = await fetch(`${API_BASE}/hardware`);
+        const data = await res.json();
+        log('api-log', 'ok', `✓ Hardware: RAM ${data.ram_used_gb}/${data.ram_total_gb} GB`);
+        consoleLog('Hardware:', JSON.stringify(data, null, 2));
+      } catch (e) {
+        log('api-log', 'err', `✗ Hardware Error: ${e.message}`);
+      }
+    };
+    
+    window.testPresets = async function() {
+      try {
+        const res = await fetch(`${API_BASE}/presets`);
+        const data = await res.json();
+        log('api-log', 'ok', `✓ Presets: ${Object.keys(data.presets).length} available`);
+        consoleLog('Presets:', JSON.stringify(data, null, 2));
+      } catch (e) {
+        log('api-log', 'err', `✗ Presets Error: ${e.message}`);
+      }
+    };
+    
+    window.testDownload = async function() {
+      log('download-log', 'info', 'Testing download endpoint...');
+      try {
+        // First create a test session
+        const testFile = new Blob(['TEST_AUDIO_DATA'], { type: 'audio/wav' });
+        const formData = new FormData();
+        formData.append('file', testFile, 'test.wav');
+        
+        const uploadRes = await fetch(`${API_BASE}/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (!uploadRes.ok) {
+          throw new Error(`Upload failed: ${uploadRes.status}`);
+        }
+        
+        const uploadData = await uploadRes.json();
+        const sessionId = uploadData.session_id;
+        log('download-log', 'ok', `✓ Test session created: ${sessionId}`);
+        
+        // Try to download (will 404 since file wasn't processed)
+        try {
+          const downloadUrl = `${API_BASE}/download/${sessionId}/test.wav`;
+          const dlRes = await fetch(downloadUrl);
+          
+          if (dlRes.status === 404) {
+            log('download-log', 'warn', '⚠ File not found (expected - not processed)');
+          } else if (dlRes.ok) {
+            log('download-log', 'ok', '✓ Download endpoint working');
+          }
+        } catch (e) {
+          log('download-log', 'err', `✗ Download error: ${e.message}`);
+        }
+        
+        consoleLog('Download test completed');
+      } catch (e) {
+        log('download-log', 'err', `✗ Test error: ${e.message}`);
+        consoleLog('Error:', e.message);
+      }
+    };
+    
+    window.testTrackCutter = function() {
+      // Check if TrackCutterUI is available
+      if (typeof window.app !== 'undefined' && window.app.trackCutter) {
+        log('cutter-log', 'ok', '✓ TrackCutterUI is loaded');
+        consoleLog('TrackCutter instance found');
+      } else {
+        log('cutter-log', 'warn', '⚠ TrackCutterUI not found on window.app');
+        consoleLog('TrackCutter not initialized - check app.js import');
+      }
+    };
+    
+    window.testUpload = async function() {
+      const fileInput = document.getElementById('test-file');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        log('upload-log', 'warn', '⚠ Please select a file first');
+        return;
+      }
+      
+      log('upload-log', 'info', `Uploading: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`);
+      
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const res = await fetch(`${API_BASE}/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (!res.ok) {
+          throw new Error(`Upload failed: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        log('upload-log', 'ok', `✓ Upload successful: ${data.filename}`);
+        consoleLog('Upload result:', JSON.stringify(data, null, 2));
+      } catch (e) {
+        log('upload-log', 'err', `✗ Upload error: ${e.message}`);
+        consoleLog('Upload error:', e.message);
+      }
+    };
+    
+    // Auto-run basic tests on load
+    window.addEventListener('load', () => {
+      consoleLog('Debug console loaded');
+      testAPI();
+      testHardware();
+    });
+  </script>
+</body>
+</html>

@@ -72,17 +72,25 @@ class Stage04Upmix(PipelineStage):
             channels["C"][:len(vocals)] = (vocals[:, 0] + vocals[:, 1]) / 2 * 0.7
             self.log("info", "  vocals → C (mono, −1.5 dB)")
         
-        # Bass → LFE (low-pass filtered)
+        # Bass → LFE (low-pass filtered) with dynamic routing from preset
         if "bass" in stem_data:
             bass = stem_data["bass"]
             bass_mono = (bass[:, 0] + bass[:, 1]) / 2
-            # Apply 80 Hz low-pass filter
-            bass_lfe = self._lowpass(bass_mono, 80, sr)
-            channels["LFE"][:len(bass_lfe)] = bass_lfe * 1.5
+            studio_cfg = context.get("studio_config", {})
+            lfe_param = studio_cfg.get("lfe", 50)   # 0-100
+            sub_param = studio_cfg.get("sub", 50)    # 0-100
+            # lfe param scales crossover: 0→60Hz, 100→120Hz
+            lfe_crossover = 60 + (lfe_param / 100) * 60
+            # sub param scales bass gain to LFE: 0→0.5x, 100→2.0x
+            bass_gain = 0.5 + (sub_param / 100) * 1.5
+            # L/R residual scales inversely with sub: 0→0.6x, 100→0.15x
+            lr_residual = 0.6 - (sub_param / 100) * 0.45
+            bass_lfe = self._lowpass(bass_mono, lfe_crossover, sr)
+            channels["LFE"][:len(bass_lfe)] = bass_lfe * bass_gain
             # Residual to L/R
-            channels["L"][:len(bass_mono)] += bass_mono * 0.3
-            channels["R"][:len(bass_mono)] += bass_mono * 0.3
-            self.log("info", "  bass   → LFE (80 Hz LP Butterworth 4th)")
+            channels["L"][:len(bass_mono)] += bass_mono * lr_residual
+            channels["R"][:len(bass_mono)] += bass_mono * lr_residual
+            self.log("info", f"  bass   → LFE ({lfe_crossover:.0f} Hz LP) gain {bass_gain:.2f}x, L/R residual {lr_residual:.2f}x")
         
         # Drums → L/R wide + Ls/Rs ambience
         if "drums" in stem_data:
@@ -109,7 +117,7 @@ class Stage04Upmix(PipelineStage):
             channels["Rs"][:len(other)] += other[:, 1] * 0.6
             self.log("info", "  other  → Ls/Rs HF cut")
 
-        await asyncio.sleep(0.3)
+        await asyncio.sleep(0.02)
 
         # Phase coherence check
         self.log("info", "  phase coherence check...")

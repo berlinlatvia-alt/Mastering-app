@@ -116,17 +116,18 @@ export class API {
   }
 
   async downloadFile(sessionId, filename) {
-    const url = `${this.baseURL}/download/${sessionId}/${filename}`;
-    
+    const url = `${this.baseURL}/download/${sessionId}/${encodeURIComponent(filename)}`;
+
     const response = await fetch(url);
-    
+
     if (!response.ok) {
-      throw new Error('Download failed');
+      const errorText = await response.text().catch(() => 'Download failed');
+      throw new Error(`Download failed: ${response.status} - ${errorText}`);
     }
 
     const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
-    
+
     const a = document.createElement('a');
     a.href = downloadUrl;
     a.download = filename;
@@ -134,5 +135,27 @@ export class API {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(downloadUrl);
+  }
+
+  async saveCutPoints(cutPoints) {
+    return this.request('/cut-points', {
+      method: 'POST',
+      body: JSON.stringify({ cut_points: cutPoints }),
+    });
+  }
+
+  async getCutPoints() {
+    return this.request('/cut-points');
+  }
+
+  async getOutputDir() {
+    return this.request('/output-dir');
+  }
+
+  async setOutputDir(path) {
+    return this.request('/output-dir', {
+      method: 'POST',
+      body: JSON.stringify({ path }),
+    });
   }
 }

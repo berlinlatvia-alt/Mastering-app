@@ -96,11 +96,22 @@ Backend returns:
   stages: [
     { status: "running", progress: 45, logs: [...] },
     ...
-  ]
+  ],
+  exported_files: [ ... ] // Dynamic output metadata
 }
                   ↓
 Frontend updates UI (stage card, sidebar, console)
 ```
+
+### 4. API Data Synchronization (Prevention Rule)
+- **Zero-Static UI Rule**: The frontend (`export.js`, `pipeline.js`) MUST NEVER hardcode values that the backend is responsible for generating (like output file names, dynamic sizes, or resulting formats).
+- **Explicit Propagation**: If a backend stage generates a dynamic file name (e.g., combining the original uploaded filename with a suffix), that exact name MUST be added to `self.exported_files` in the stage, attached to the `pipeline.context` in `manager.py`, and explicitly exported in the `StatusResponse` model in `main.py` so it survives JSON serialization to the frontend.
+- **Always check the chain**: 
+  1. Is the data in the backend context?
+  2. Is it in the Pydantic API response model?
+  3. Does the frontend JS actively read that payload instead of a fallback template?
+
+---
 
 ### 4. Export
 

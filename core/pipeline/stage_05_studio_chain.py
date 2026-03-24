@@ -47,7 +47,7 @@ class Stage05StudioChain(PipelineStage):
         self.log("info", "  [ALL] HPF 20 Hz Butterworth 4th")
         for ch in range(6):
             data[:, ch] = self._highpass(data[:, ch], 20, sr)
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.01)
 
         # Console emulation (harmonic saturation)
         console_model = config.get("console", "SSL 4000 G")
@@ -58,7 +58,7 @@ class Stage05StudioChain(PipelineStage):
         # Apply tape/console saturation
         for ch in range(6):
             data[:, ch] = self._tape_saturation(data[:, ch], tape_val / 100)
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.01)
 
         # Bus compression
         comp_val = config.get("buscomp", 45)
@@ -68,8 +68,11 @@ class Stage05StudioChain(PipelineStage):
         self.log("info", f"  [COMP] {ratio:.1f}:1 attack {attack*1000:.0f}ms release {release*1000:.0f}ms")
         
         for ch in range(6):
-            data[:, ch] = self._compress(data[:, ch], ratio, attack, release, sr)
-        await asyncio.sleep(0.1)
+            if ch == 3:  # Skip LFE from bus compression
+                continue
+            data[:, ch] = self._compress(data[:, ch], ratio, attack, release, sr, sidechain_hp=100)
+        self.log("info", "  [COMP] LFE bypassed, sidechain HP 100 Hz")
+        await asyncio.sleep(0.01)
         
         # Genre specific advanced processing
         if config.get("mb_lowmid_comp"):
@@ -104,7 +107,7 @@ class Stage05StudioChain(PipelineStage):
             # Air shelf
             if ch < 5:  # Not LFE
                 data[:, ch] = self._high_shelf(data[:, ch], 14000, sr, air)
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.01)
 
         # De-esser on center channel
         self.log("info", "  [C] de-esser gr_max −3.8 dB")
@@ -114,6 +117,37 @@ class Stage05StudioChain(PipelineStage):
         self.log("info", "  [Ls/Rs] shelf −4 dB @ 12 kHz")
         for ch in [4, 5]:  # Ls, Rs
             data[:, ch] = self._high_shelf(data[:, ch], 12000, sr, -4)
+
+        # Reverb on surround (and light on L/R) — FFT convolution for speed
+        verb_val = config.get("verb", 0)
+        if verb_val > 0:
+            from scipy.signal import fftconvolve
+            verb_norm = verb_val / 100.0
+            # Cap impulse at 0.08s — enough for reverb colour, fast to convolve
+            impulse_len = int(min(verb_norm * 0.08, 0.08) * sr)
+            if impulse_len > 16:
+                impulse = np.exp(-np.linspace(0, 6, impulse_len))
+                impulse /= np.sum(impulse)
+                wet_amount = verb_norm * 0.3
+                lr_wet = wet_amount * 0.5
+                for ch in [4, 5]:
+                    wet = fftconvolve(data[:, ch], impulse)[:len(data[:, ch])]
+                    data[:, ch] = data[:, ch] * (1 - wet_amount) + wet * wet_amount
+                for ch in [0, 1]:
+                    wet = fftconvolve(data[:, ch], impulse)[:len(data[:, ch])]
+                    data[:, ch] = data[:, ch] * (1 - lr_wet) + wet * lr_wet
+                self.log("info", f"  [VERB] surround reverb {verb_val}% (Ls/Rs {wet_amount:.0%}, L/R {lr_wet:.0%})")
+        await asyncio.sleep(0.01)
+
+        # Stereo width (mid-side on L/R)
+        width_val = config.get("width", 100)
+        if width_val != 100:
+            width_factor = width_val / 100.0
+            mid = (data[:, 0] + data[:, 1]) / 2
+            side = (data[:, 0] - data[:, 1]) / 2
+            data[:, 0] = mid + side * width_factor
+            data[:, 1] = mid - side * width_factor
+            self.log("info", f"  [WIDTH] stereo width {width_val}% ({'wider' if width_val > 100 else 'narrower'})")
 
         # Genre specific transient / master clipping
         if config.get("tape_saturate_loudness"):
@@ -166,10 +200,14 @@ class Stage05StudioChain(PipelineStage):
         # Mix dry/wet
         return data * (1 - amount * 0.5) + saturated * (amount * 0.5)
 
-    def _compress(self, data: np.ndarray, ratio: float, attack: float, release: float, sr: int):
-        """Apply dynamic range compression"""
-        # Simple envelope follower
-        envelope = np.abs(data)
+    def _compress(self, data: np.ndarray, ratio: float, attack: float, release: float, sr: int, sidechain_hp: float = 0):
+        """Apply dynamic range compression with optional sidechain high-pass"""
+        # Use HP-filtered sidechain signal for envelope if sidechain_hp > 0
+        if sidechain_hp > 0:
+            sidechain_signal = self._highpass(data, sidechain_hp, sr, 2)
+            envelope = np.abs(sidechain_signal)
+        else:
+            envelope = np.abs(data)
         smoothed = np.zeros_like(envelope)
         
         attack_coef = np.exp(-1 / (attack * sr))
