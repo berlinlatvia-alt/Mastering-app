@@ -70,8 +70,8 @@ class Stage05StudioChain(PipelineStage):
         for ch in range(6):
             if ch == 3:  # Skip LFE from bus compression
                 continue
-            data[:, ch] = self._compress(data[:, ch], ratio, attack, release, sr, sidechain_hp=100)
-        self.log("info", "  [COMP] LFE bypassed, sidechain HP 100 Hz")
+            data[:, ch] = self._compress(data[:, ch], ratio, attack, release, sr, sidechain_hp=150)
+        self.log("info", "  [COMP] LFE bypassed, sidechain HP 150 Hz")
         await asyncio.sleep(0.01)
         
         # Genre specific advanced processing

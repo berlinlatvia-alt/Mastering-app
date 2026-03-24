@@ -88,8 +88,9 @@ class Stage04Upmix(PipelineStage):
             bass_lfe = self._lowpass(bass_mono, lfe_crossover, sr)
             channels["LFE"][:len(bass_lfe)] = bass_lfe * bass_gain
             # Residual to L/R
-            channels["L"][:len(bass_mono)] += bass_mono * lr_residual
-            channels["R"][:len(bass_mono)] += bass_mono * lr_residual
+            bass_residual = self._highpass(bass_mono, lfe_crossover, sr)
+            channels["L"][:len(bass_residual)] += bass_residual * lr_residual
+            channels["R"][:len(bass_residual)] += bass_residual * lr_residual
             self.log("info", f"  bass   → LFE ({lfe_crossover:.0f} Hz LP) gain {bass_gain:.2f}x, L/R residual {lr_residual:.2f}x")
         
         # Drums → L/R wide + Ls/Rs ambience
@@ -156,6 +157,13 @@ class Stage04Upmix(PipelineStage):
         nyquist = sr / 2
         normalized_cutoff = cutoff / nyquist
         b, a = butter(order, normalized_cutoff, btype='low')
+        return lfilter(b, a, data)
+
+    def _highpass(self, data: np.ndarray, cutoff: float, sr: int, order: int = 4):
+        """Apply high-pass Butterworth filter"""
+        nyquist = sr / 2
+        normalized_cutoff = cutoff / nyquist
+        b, a = butter(order, normalized_cutoff, btype='high')
         return lfilter(b, a, data)
 
     async def _render_51(self, channels: Dict[str, np.ndarray], output_path: Path, sr: int):
