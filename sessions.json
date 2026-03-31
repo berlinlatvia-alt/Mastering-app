@@ -6399,5 +6399,4710 @@
         }
       ]
     }
+  },
+  "a68998e5-4483-4ab5-b435-15c3202fc779": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\a68998e5-4483-4ab5-b435-15c3202fc779\\Toxic attachment - punchy lines.wav",
+    "filename": "Toxic attachment - punchy lines.wav",
+    "size_mb": 30.542152404785156,
+    "result": {
+      "status": "complete",
+      "output_dir": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\a68998e5-4483-4ab5-b435-15c3202fc779",
+      "exported_files": [
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\a68998e5-4483-4ab5-b435-15c3202fc779\\Toxic attachment - punchy lines_youtube.mp3",
+          "filename": "Toxic attachment - punchy lines_youtube.mp3",
+          "format": "MP3 320k",
+          "size_mb": 6.4,
+          "label": "YouTube Ready"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\a68998e5-4483-4ab5-b435-15c3202fc779\\Toxic attachment - punchy lines_spotify.wav",
+          "filename": "Toxic attachment - punchy lines_spotify.wav",
+          "format": "WAV 24-bit",
+          "size_mb": 126.3,
+          "label": "Spotify Master"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\a68998e5-4483-4ab5-b435-15c3202fc779\\Toxic attachment - punchy lines_surround_5.1.flac",
+          "filename": "Toxic attachment - punchy lines_surround_5.1.flac",
+          "format": "FLAC 5.1",
+          "size_mb": 29.4,
+          "label": "Pro 5.1 Surround"
+        }
+      ],
+      "stages": [
+        {
+          "stage_num": "01",
+          "name": "Input Preparation & Analysis",
+          "description": "Resample \u00b7 normalize \u00b7 spectral scan \u00b7 true-peak detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffprobe -v quiet -print_format json -show_streams Toxic attachment - punchy lines.wav"
+            },
+            {
+              "t": "info",
+              "m": "  sample_rate: 48000 | bit_depth: 16 | channels: 2 | duration: 2m46s"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Toxic attachment - punchy lines.wav -vn -ar 48000 -sample_fmt s16 -ac 2 Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 resample complete  44100\u219248000 Hz"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python analyze.py --true-peak --lufs"
+            },
+            {
+              "t": "info",
+              "m": "  integrated: -17.2 LUFS  |  true-peak: -3.7 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  stereo width: 0.17  |  LR correlation: 0.83"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 analysis complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "02",
+          "name": "Track Cutting",
+          "description": "Manual cut points or silence detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  \u2298 Track cutting skipped \u2014 using full audio"
+            }
+          ]
+        },
+        {
+          "stage_num": "03",
+          "name": "Stem Separation",
+          "description": "Demucs v4 \u00b7 6 stems",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ demucs --model htdemucs_6s Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "info",
+              "m": "  device: cpu"
+            },
+            {
+              "t": "info",
+              "m": "  loading model: htdemucs_6s"
+            },
+            {
+              "t": "info",
+              "m": "  loading audio..."
+            },
+            {
+              "t": "info",
+              "m": "  separating stems..."
+            },
+            {
+              "t": "info",
+              "m": "  drums.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  bass.wav     exported"
+            },
+            {
+              "t": "info",
+              "m": "  other.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  vocals.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  guitar.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  piano.wav    exported"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 6 stems separated"
+            }
+          ]
+        },
+        {
+          "stage_num": "04",
+          "name": "5.1 Channel Assignment & Spatial Upmix",
+          "description": "Stem routing \u00b7 pan law \u00b7 LFE crossover",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python upmix_51.py --stems stems/ --law itu775"
+            },
+            {
+              "t": "info",
+              "m": "  loaded vocals.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded drums.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded bass.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded guitar.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded piano.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded other.wav"
+            },
+            {
+              "t": "info",
+              "m": "  routing stems to channels..."
+            },
+            {
+              "t": "info",
+              "m": "  vocals \u2192 C (mono, \u22121.5 dB)"
+            },
+            {
+              "t": "info",
+              "m": "  bass   \u2192 LFE (90 Hz LP) gain 1.25x, L/R residual 0.38x"
+            },
+            {
+              "t": "info",
+              "m": "  drums  \u2192 L/R wide + Ls/Rs \u22126 dB"
+            },
+            {
+              "t": "info",
+              "m": "  guitar \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  piano \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  other  \u2192 Ls/Rs HF cut"
+            },
+            {
+              "t": "info",
+              "m": "  phase coherence check..."
+            },
+            {
+              "t": "info",
+              "m": "  phase L\u2194R: 0.93 \u2713  L\u2194Ls: 0.64 \u2713"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 5.1 upmix \u2192 output_51_raw.wav (6ch)"
+            }
+          ]
+        },
+        {
+          "stage_num": "05",
+          "name": "Pro Studio EQ, Dynamics & Color",
+          "description": "Console emulation \u00b7 tape \u00b7 bus comp \u00b7 exciter",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python studio_chain.py --preset pop --console ssl --tape 35 --comp 45"
+            },
+            {
+              "t": "info",
+              "m": "  processing 6 channels @ 44100Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [ALL] HPF 20 Hz Butterworth 4th"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] SSL 4000 G console model loaded"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tape sat 35%  2nd: +1.8 dB  3rd: +0.4 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] 4.2:1 attack 10ms release 100ms"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] LFE bypassed, sidechain HP 100 Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] shelf +3 dB @ 60 Hz  |  air +4 dB @ 14 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] mids -2 dB @ 400 Hz scoop"
+            },
+            {
+              "t": "info",
+              "m": "  [C] de-esser gr_max \u22123.8 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls/Rs] shelf \u22124 dB @ 12 kHz"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 studio processing complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "06",
+          "name": "Loudness Normalization (EBU R128)",
+          "description": "Integrated LUFS \u00b7 true-peak \u00b7 LRA",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i output_51_eq.wav -af ebur128=framelog=verbose -f null -"
+            },
+            {
+              "t": "info",
+              "m": "  measuring loudness per channel..."
+            },
+            {
+              "t": "info",
+              "m": "  [L  ]    -26.5 LUFS  TP: -3.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [R  ]    -26.9 LUFS  TP: -3.5 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [C  ]    -27.0 LUFS  TP: -7.5 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LFE]    -28.1 LUFS  TP: -3.7 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls ]    -32.8 LUFS  TP: -8.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Rs ]    -33.3 LUFS  TP: -9.1 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  integrated loudness: -21.0 LUFS"
+            },
+            {
+              "t": "info",
+              "m": "  applying makeup: +7.0 dB \u2192 -14.0 LUFS target"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 final: -14.0 LUFS  TP: -1.0 dBTP \u2713"
+            }
+          ]
+        },
+        {
+          "stage_num": "07",
+          "name": "Encode & Export",
+          "description": "6-ch WAV \u00b7 AC-3 \u00b7 DTS \u00b7 metadata embed",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  Mode: BASIC \u2014 generating 3 files"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a libmp3lame -b:a 320k -ar 48000 Toxic attachment - punchy lines_youtube.mp3"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_youtube.mp3  320 kbps stereo  (6.4 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 Toxic attachment - punchy lines_spotify.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_spotify.wav  48kHz 24-bit  (126.3 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a flac Toxic attachment - punchy lines_surround_5.1.flac"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_surround_5.1.flac  FLAC 5.1 Lossless  (29.4 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python write_metadata.py --dialnorm=-31"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 metadata embedded"
+            },
+            {
+              "t": "sep",
+              "m": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "ok",
+              "m": "  \ud83c\udf89 PIPELINE COMPLETE \u2014 click \u2b07 EXPORT FILES"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "71c53029-c6bf-4ca0-9c45-100a87f5b933": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\71c53029-c6bf-4ca0-9c45-100a87f5b933\\Toxic attachment - punchy lines.wav",
+    "filename": "Toxic attachment - punchy lines.wav",
+    "size_mb": 30.542152404785156,
+    "result": {
+      "status": "complete",
+      "output_dir": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\71c53029-c6bf-4ca0-9c45-100a87f5b933",
+      "exported_files": [
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\71c53029-c6bf-4ca0-9c45-100a87f5b933\\Toxic attachment - punchy lines_youtube.mp3",
+          "filename": "Toxic attachment - punchy lines_youtube.mp3",
+          "format": "MP3 320k",
+          "size_mb": 6.4,
+          "label": "YouTube Ready"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\71c53029-c6bf-4ca0-9c45-100a87f5b933\\Toxic attachment - punchy lines_spotify.wav",
+          "filename": "Toxic attachment - punchy lines_spotify.wav",
+          "format": "WAV 24-bit",
+          "size_mb": 126.3,
+          "label": "Spotify Master"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\71c53029-c6bf-4ca0-9c45-100a87f5b933\\Toxic attachment - punchy lines_surround_5.1.flac",
+          "filename": "Toxic attachment - punchy lines_surround_5.1.flac",
+          "format": "FLAC 5.1",
+          "size_mb": 28.9,
+          "label": "Pro 5.1 Surround"
+        }
+      ],
+      "stages": [
+        {
+          "stage_num": "01",
+          "name": "Input Preparation & Analysis",
+          "description": "Resample \u00b7 normalize \u00b7 spectral scan \u00b7 true-peak detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffprobe -v quiet -print_format json -show_streams Toxic attachment - punchy lines.wav"
+            },
+            {
+              "t": "info",
+              "m": "  sample_rate: 48000 | bit_depth: 16 | channels: 2 | duration: 2m46s"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Toxic attachment - punchy lines.wav -vn -ar 48000 -sample_fmt s16 -ac 2 Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 resample complete  44100\u219248000 Hz"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python analyze.py --true-peak --lufs"
+            },
+            {
+              "t": "info",
+              "m": "  integrated: -17.2 LUFS  |  true-peak: -3.7 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  stereo width: 0.17  |  LR correlation: 0.83"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 analysis complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "02",
+          "name": "Track Cutting",
+          "description": "Manual cut points or silence detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  \u2298 Track cutting skipped \u2014 using full audio"
+            }
+          ]
+        },
+        {
+          "stage_num": "03",
+          "name": "Stem Separation",
+          "description": "Demucs v4 \u00b7 6 stems",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ demucs --model htdemucs_6s Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "info",
+              "m": "  device: cpu"
+            },
+            {
+              "t": "info",
+              "m": "  loading model: htdemucs_6s"
+            },
+            {
+              "t": "info",
+              "m": "  loading audio..."
+            },
+            {
+              "t": "info",
+              "m": "  separating stems..."
+            },
+            {
+              "t": "info",
+              "m": "  drums.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  bass.wav     exported"
+            },
+            {
+              "t": "info",
+              "m": "  other.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  vocals.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  guitar.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  piano.wav    exported"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 6 stems separated"
+            }
+          ]
+        },
+        {
+          "stage_num": "04",
+          "name": "5.1 Channel Assignment & Spatial Upmix",
+          "description": "Stem routing \u00b7 pan law \u00b7 LFE crossover",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python upmix_51.py --stems stems/ --law itu775"
+            },
+            {
+              "t": "info",
+              "m": "  loaded vocals.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded drums.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded bass.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded guitar.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded piano.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded other.wav"
+            },
+            {
+              "t": "info",
+              "m": "  routing stems to channels..."
+            },
+            {
+              "t": "info",
+              "m": "  vocals \u2192 C (mono, \u22121.5 dB)"
+            },
+            {
+              "t": "info",
+              "m": "  bass   \u2192 LFE (111 Hz LP) gain 1.48x, L/R residual 0.31x"
+            },
+            {
+              "t": "info",
+              "m": "  drums  \u2192 L/R wide + Ls/Rs \u22126 dB"
+            },
+            {
+              "t": "info",
+              "m": "  guitar \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  piano \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  other  \u2192 Ls/Rs HF cut"
+            },
+            {
+              "t": "info",
+              "m": "  phase coherence check..."
+            },
+            {
+              "t": "info",
+              "m": "  phase L\u2194R: 0.86 \u2713  L\u2194Ls: 0.92 \u2713"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 5.1 upmix \u2192 output_51_raw.wav (6ch)"
+            }
+          ]
+        },
+        {
+          "stage_num": "05",
+          "name": "Pro Studio EQ, Dynamics & Color",
+          "description": "Console emulation \u00b7 tape \u00b7 bus comp \u00b7 exciter",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python studio_chain.py --preset spotify_rb --console ssl --tape 45 --comp 25"
+            },
+            {
+              "t": "info",
+              "m": "  processing 6 channels @ 44100Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [ALL] HPF 20 Hz Butterworth 4th"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] SSL 4000 G console model loaded"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tape sat 45%  2nd: +1.8 dB  3rd: +0.4 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] 2.0:1 attack 10ms release 100ms"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] LFE bypassed, sidechain HP 150 Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] cut harsh 3-4kHz range"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] shelf +4 dB @ 60 Hz  |  air +3 dB @ 14 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] mids +0 dB @ 400 Hz scoop"
+            },
+            {
+              "t": "info",
+              "m": "  [C] de-esser gr_max \u22123.8 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls/Rs] shelf \u22124 dB @ 12 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [VERB] surround reverb 40% (Ls/Rs 12%, L/R 6%)"
+            },
+            {
+              "t": "info",
+              "m": "  [WIDTH] stereo width 110% (wider)"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tube/tape saturation for loudness"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 studio processing complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "06",
+          "name": "Loudness Normalization (EBU R128)",
+          "description": "Integrated LUFS \u00b7 true-peak \u00b7 LRA",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i output_51_eq.wav -af ebur128=framelog=verbose -f null -"
+            },
+            {
+              "t": "info",
+              "m": "  measuring loudness per channel..."
+            },
+            {
+              "t": "info",
+              "m": "  [L  ]    -23.8 LUFS  TP: -1.3 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [R  ]    -24.3 LUFS  TP: -1.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [C  ]    -23.6 LUFS  TP: -4.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LFE]    -22.1 LUFS  TP: -0.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls ]    -30.1 LUFS  TP: -6.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Rs ]    -30.7 LUFS  TP: -6.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  integrated loudness: -17.7 LUFS"
+            },
+            {
+              "t": "info",
+              "m": "  applying makeup: +7.2 dB \u2192 -10.5 LUFS target"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 final: -10.5 LUFS  TP: -1.0 dBTP \u2713"
+            }
+          ]
+        },
+        {
+          "stage_num": "07",
+          "name": "Encode & Export",
+          "description": "6-ch WAV \u00b7 AC-3 \u00b7 DTS \u00b7 metadata embed",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  Mode: BASIC \u2014 generating 3 files"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a libmp3lame -b:a 320k -ar 48000 Toxic attachment - punchy lines_youtube.mp3"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_youtube.mp3  320 kbps stereo  (6.4 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 Toxic attachment - punchy lines_spotify.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_spotify.wav  48kHz 24-bit  (126.3 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a flac Toxic attachment - punchy lines_surround_5.1.flac"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_surround_5.1.flac  FLAC 5.1 Lossless  (28.9 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python write_metadata.py --dialnorm=-31"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 metadata embedded"
+            },
+            {
+              "t": "sep",
+              "m": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "ok",
+              "m": "  \ud83c\udf89 PIPELINE COMPLETE \u2014 click \u2b07 EXPORT FILES"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "6a7d4f00-ac01-419b-a26c-e639edc5213e": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\6a7d4f00-ac01-419b-a26c-e639edc5213e\\Undegradable nuclear - too much Trap (group).wav",
+    "filename": "Undegradable nuclear - too much Trap (group).wav",
+    "size_mb": 22.551429748535156,
+    "result": {
+      "status": "complete",
+      "output_dir": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\6a7d4f00-ac01-419b-a26c-e639edc5213e",
+      "exported_files": [
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\6a7d4f00-ac01-419b-a26c-e639edc5213e\\Undegradable nuclear - too much Trap (group)_youtube.mp3",
+          "filename": "Undegradable nuclear - too much Trap (group)_youtube.mp3",
+          "format": "MP3 320k",
+          "size_mb": 4.7,
+          "label": "YouTube Ready"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\6a7d4f00-ac01-419b-a26c-e639edc5213e\\Undegradable nuclear - too much Trap (group)_spotify.wav",
+          "filename": "Undegradable nuclear - too much Trap (group)_spotify.wav",
+          "format": "WAV 24-bit",
+          "size_mb": 93.2,
+          "label": "Spotify Master"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\6a7d4f00-ac01-419b-a26c-e639edc5213e\\Undegradable nuclear - too much Trap (group)_surround_5.1.flac",
+          "filename": "Undegradable nuclear - too much Trap (group)_surround_5.1.flac",
+          "format": "FLAC 5.1",
+          "size_mb": 25.9,
+          "label": "Pro 5.1 Surround"
+        }
+      ],
+      "stages": [
+        {
+          "stage_num": "01",
+          "name": "Input Preparation & Analysis",
+          "description": "Resample \u00b7 normalize \u00b7 spectral scan \u00b7 true-peak detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffprobe -v quiet -print_format json -show_streams Undegradable nuclear - too much Trap (group).wav"
+            },
+            {
+              "t": "info",
+              "m": "  sample_rate: 48000 | bit_depth: 16 | channels: 2 | duration: 2m03s"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Undegradable nuclear - too much Trap (group).wav -vn -ar 48000 -sample_fmt s16 -ac 2 Undegradable nuclear - too much Trap (group)_48k.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 resample complete  44100\u219248000 Hz"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python analyze.py --true-peak --lufs"
+            },
+            {
+              "t": "info",
+              "m": "  integrated: -16.2 LUFS  |  true-peak: -2.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  stereo width: 0.18  |  LR correlation: 0.82"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 analysis complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "02",
+          "name": "Track Cutting",
+          "description": "Manual cut points or silence detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  \u2298 Track cutting skipped \u2014 using full audio"
+            }
+          ]
+        },
+        {
+          "stage_num": "03",
+          "name": "Stem Separation",
+          "description": "Demucs v4 \u00b7 6 stems",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ demucs --model htdemucs_6s Undegradable nuclear - too much Trap (group)_48k.wav"
+            },
+            {
+              "t": "info",
+              "m": "  device: cpu"
+            },
+            {
+              "t": "info",
+              "m": "  loading model: htdemucs_6s"
+            },
+            {
+              "t": "info",
+              "m": "  loading audio..."
+            },
+            {
+              "t": "info",
+              "m": "  separating stems..."
+            },
+            {
+              "t": "info",
+              "m": "  drums.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  bass.wav     exported"
+            },
+            {
+              "t": "info",
+              "m": "  other.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  vocals.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  guitar.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  piano.wav    exported"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 6 stems separated"
+            }
+          ]
+        },
+        {
+          "stage_num": "04",
+          "name": "5.1 Channel Assignment & Spatial Upmix",
+          "description": "Stem routing \u00b7 pan law \u00b7 LFE crossover",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python upmix_51.py --stems stems/ --law itu775"
+            },
+            {
+              "t": "info",
+              "m": "  loaded vocals.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded drums.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded bass.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded guitar.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded piano.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded other.wav"
+            },
+            {
+              "t": "info",
+              "m": "  routing stems to channels..."
+            },
+            {
+              "t": "info",
+              "m": "  vocals \u2192 C (mono, \u22121.5 dB)"
+            },
+            {
+              "t": "info",
+              "m": "  bass   \u2192 LFE (111 Hz LP) gain 1.48x, L/R residual 0.31x"
+            },
+            {
+              "t": "info",
+              "m": "  drums  \u2192 L/R wide + Ls/Rs \u22126 dB"
+            },
+            {
+              "t": "info",
+              "m": "  guitar \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  piano \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  other  \u2192 Ls/Rs HF cut"
+            },
+            {
+              "t": "info",
+              "m": "  phase coherence check..."
+            },
+            {
+              "t": "info",
+              "m": "  phase L\u2194R: 0.99 \u26a0  L\u2194Ls: 0.02 \u2713"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 5.1 upmix \u2192 output_51_raw.wav (6ch)"
+            }
+          ]
+        },
+        {
+          "stage_num": "05",
+          "name": "Pro Studio EQ, Dynamics & Color",
+          "description": "Console emulation \u00b7 tape \u00b7 bus comp \u00b7 exciter",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python studio_chain.py --preset pop --console ssl --tape 45 --comp 25"
+            },
+            {
+              "t": "info",
+              "m": "  processing 6 channels @ 44100Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [ALL] HPF 20 Hz Butterworth 4th"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] SSL 4000 G console model loaded"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tape sat 45%  2nd: +1.8 dB  3rd: +0.4 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] 2.0:1 attack 10ms release 100ms"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] LFE bypassed, sidechain HP 150 Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] cut harsh 3-4kHz range"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] shelf +4 dB @ 60 Hz  |  air +3 dB @ 14 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] mids +0 dB @ 400 Hz scoop"
+            },
+            {
+              "t": "info",
+              "m": "  [C] de-esser gr_max \u22123.8 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls/Rs] shelf \u22124 dB @ 12 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [VERB] surround reverb 40% (Ls/Rs 12%, L/R 6%)"
+            },
+            {
+              "t": "info",
+              "m": "  [WIDTH] stereo width 110% (wider)"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tube/tape saturation for loudness"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 studio processing complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "06",
+          "name": "Loudness Normalization (EBU R128)",
+          "description": "Integrated LUFS \u00b7 true-peak \u00b7 LRA",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i output_51_eq.wav -af ebur128=framelog=verbose -f null -"
+            },
+            {
+              "t": "info",
+              "m": "  measuring loudness per channel..."
+            },
+            {
+              "t": "info",
+              "m": "  [L  ]    -23.9 LUFS  TP: -2.9 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [R  ]    -23.8 LUFS  TP: -2.9 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [C  ]    -19.4 LUFS  TP: -3.6 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LFE]    -23.7 LUFS  TP: -0.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls ]    -25.1 LUFS  TP: -6.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Rs ]    -25.4 LUFS  TP: -6.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  integrated loudness: -15.5 LUFS"
+            },
+            {
+              "t": "info",
+              "m": "  applying makeup: +5.0 dB \u2192 -10.5 LUFS target"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 final: -10.5 LUFS  TP: -1.0 dBTP \u2713"
+            }
+          ]
+        },
+        {
+          "stage_num": "07",
+          "name": "Encode & Export",
+          "description": "6-ch WAV \u00b7 AC-3 \u00b7 DTS \u00b7 metadata embed",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  Mode: BASIC \u2014 generating 3 files"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a libmp3lame -b:a 320k -ar 48000 Undegradable nuclear - too much Trap (group)_youtube.mp3"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Undegradable nuclear - too much Trap (group)_youtube.mp3  320 kbps stereo  (4.7 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 Undegradable nuclear - too much Trap (group)_spotify.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Undegradable nuclear - too much Trap (group)_spotify.wav  48kHz 24-bit  (93.2 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a flac Undegradable nuclear - too much Trap (group)_surround_5.1.flac"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Undegradable nuclear - too much Trap (group)_surround_5.1.flac  FLAC 5.1 Lossless  (25.9 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python write_metadata.py --dialnorm=-31"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 metadata embedded"
+            },
+            {
+              "t": "sep",
+              "m": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "ok",
+              "m": "  \ud83c\udf89 PIPELINE COMPLETE \u2014 click \u2b07 EXPORT FILES"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "0b284e1f-dc7d-491b-a061-64c07c89ebd2": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\0b284e1f-dc7d-491b-a061-64c07c89ebd2\\Undegradable nuclear - too much Trap (group).wav",
+    "filename": "Undegradable nuclear - too much Trap (group).wav",
+    "size_mb": 22.551429748535156,
+    "result": {
+      "status": "aborted",
+      "error": "Processing was aborted by user"
+    }
+  },
+  "ffb10121-6561-4d15-8006-10c8ef8e832e": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\ffb10121-6561-4d15-8006-10c8ef8e832e\\Undegradable nuclear - too much Trap (group).wav",
+    "filename": "Undegradable nuclear - too much Trap (group).wav",
+    "size_mb": 22.551429748535156,
+    "result": {
+      "status": "complete",
+      "output_dir": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\ffb10121-6561-4d15-8006-10c8ef8e832e",
+      "exported_files": [
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\ffb10121-6561-4d15-8006-10c8ef8e832e\\Undegradable nuclear - too much Trap (group)_youtube.mp3",
+          "filename": "Undegradable nuclear - too much Trap (group)_youtube.mp3",
+          "format": "MP3 320k",
+          "size_mb": 4.7,
+          "label": "YouTube Ready"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\ffb10121-6561-4d15-8006-10c8ef8e832e\\Undegradable nuclear - too much Trap (group)_spotify.wav",
+          "filename": "Undegradable nuclear - too much Trap (group)_spotify.wav",
+          "format": "WAV 24-bit",
+          "size_mb": 93.2,
+          "label": "Spotify Master"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\ffb10121-6561-4d15-8006-10c8ef8e832e\\Undegradable nuclear - too much Trap (group)_surround_5.1.flac",
+          "filename": "Undegradable nuclear - too much Trap (group)_surround_5.1.flac",
+          "format": "FLAC 5.1",
+          "size_mb": 25.0,
+          "label": "Pro 5.1 Surround"
+        }
+      ],
+      "stages": [
+        {
+          "stage_num": "01",
+          "name": "Input Preparation & Analysis",
+          "description": "Resample \u00b7 normalize \u00b7 spectral scan \u00b7 true-peak detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffprobe -v quiet -print_format json -show_streams Undegradable nuclear - too much Trap (group).wav"
+            },
+            {
+              "t": "info",
+              "m": "  sample_rate: 48000 | bit_depth: 16 | channels: 2 | duration: 2m03s"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Undegradable nuclear - too much Trap (group).wav -vn -ar 48000 -sample_fmt s16 -ac 2 Undegradable nuclear - too much Trap (group)_48k.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 resample complete  44100\u219248000 Hz"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python analyze.py --true-peak --lufs"
+            },
+            {
+              "t": "info",
+              "m": "  integrated: -16.2 LUFS  |  true-peak: -2.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  stereo width: 0.18  |  LR correlation: 0.82"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 analysis complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "02",
+          "name": "Track Cutting",
+          "description": "Manual cut points or silence detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  \u2298 Track cutting skipped \u2014 using full audio"
+            }
+          ]
+        },
+        {
+          "stage_num": "03",
+          "name": "Stem Separation",
+          "description": "Demucs v4 \u00b7 6 stems",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ demucs --model htdemucs_6s Undegradable nuclear - too much Trap (group)_48k.wav"
+            },
+            {
+              "t": "info",
+              "m": "  device: cpu"
+            },
+            {
+              "t": "info",
+              "m": "  loading model: htdemucs_6s"
+            },
+            {
+              "t": "info",
+              "m": "  loading audio..."
+            },
+            {
+              "t": "info",
+              "m": "  separating stems..."
+            },
+            {
+              "t": "info",
+              "m": "  drums.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  bass.wav     exported"
+            },
+            {
+              "t": "info",
+              "m": "  other.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  vocals.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  guitar.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  piano.wav    exported"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 6 stems separated"
+            }
+          ]
+        },
+        {
+          "stage_num": "04",
+          "name": "5.1 Channel Assignment & Spatial Upmix",
+          "description": "Stem routing \u00b7 pan law \u00b7 LFE crossover",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python upmix_51.py --stems stems/ --law itu775"
+            },
+            {
+              "t": "info",
+              "m": "  loaded vocals.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded drums.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded bass.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded guitar.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded piano.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded other.wav"
+            },
+            {
+              "t": "info",
+              "m": "  routing stems to channels..."
+            },
+            {
+              "t": "info",
+              "m": "  vocals \u2192 C (mono, \u22121.5 dB)"
+            },
+            {
+              "t": "info",
+              "m": "  bass   \u2192 LFE (120 Hz LP) gain 1.92x, L/R residual 0.17x"
+            },
+            {
+              "t": "info",
+              "m": "  drums  \u2192 L/R wide + Ls/Rs \u22126 dB"
+            },
+            {
+              "t": "info",
+              "m": "  guitar \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  piano \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  other  \u2192 Ls/Rs HF cut"
+            },
+            {
+              "t": "info",
+              "m": "  phase coherence check..."
+            },
+            {
+              "t": "info",
+              "m": "  phase L\u2194R: 0.95 \u2713  L\u2194Ls: 0.06 \u2713"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 5.1 upmix \u2192 output_51_raw.wav (6ch)"
+            }
+          ]
+        },
+        {
+          "stage_num": "05",
+          "name": "Pro Studio EQ, Dynamics & Color",
+          "description": "Console emulation \u00b7 tape \u00b7 bus comp \u00b7 exciter",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python studio_chain.py --preset spotify_hiphop --console ssl --tape 30 --comp 70"
+            },
+            {
+              "t": "info",
+              "m": "  processing 6 channels @ 44100Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [ALL] HPF 20 Hz Butterworth 4th"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] SSL 4000 G console model loaded"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tape sat 30%  2nd: +1.8 dB  3rd: +0.4 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] 5.9:1 attack 35ms release 100ms"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] LFE bypassed, sidechain HP 150 Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] shelf +7 dB @ 60 Hz  |  air +4 dB @ 14 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] mids -2 dB @ 400 Hz scoop"
+            },
+            {
+              "t": "info",
+              "m": "  [C] de-esser gr_max \u22123.8 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls/Rs] shelf \u22124 dB @ 12 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [VERB] surround reverb 15% (Ls/Rs 4%, L/R 2%)"
+            },
+            {
+              "t": "info",
+              "m": "  [DYN] hard clip transients before final limiting"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 studio processing complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "06",
+          "name": "Loudness Normalization (EBU R128)",
+          "description": "Integrated LUFS \u00b7 true-peak \u00b7 LRA",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i output_51_eq.wav -af ebur128=framelog=verbose -f null -"
+            },
+            {
+              "t": "info",
+              "m": "  measuring loudness per channel..."
+            },
+            {
+              "t": "info",
+              "m": "  [L  ]    -25.4 LUFS  TP: -1.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [R  ]    -25.4 LUFS  TP: -1.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [C  ]    -22.5 LUFS  TP: -5.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LFE]    -21.7 LUFS  TP: -1.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls ]    -27.3 LUFS  TP: -6.1 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Rs ]    -27.6 LUFS  TP: -6.6 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  integrated loudness: -17.4 LUFS"
+            },
+            {
+              "t": "info",
+              "m": "  applying makeup: +8.4 dB \u2192 -9.0 LUFS target"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 final: -9.0 LUFS  TP: -1.0 dBTP \u2713"
+            }
+          ]
+        },
+        {
+          "stage_num": "07",
+          "name": "Encode & Export",
+          "description": "6-ch WAV \u00b7 AC-3 \u00b7 DTS \u00b7 metadata embed",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  Mode: BASIC \u2014 generating 3 files"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a libmp3lame -b:a 320k -ar 48000 Undegradable nuclear - too much Trap (group)_youtube.mp3"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Undegradable nuclear - too much Trap (group)_youtube.mp3  320 kbps stereo  (4.7 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 Undegradable nuclear - too much Trap (group)_spotify.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Undegradable nuclear - too much Trap (group)_spotify.wav  48kHz 24-bit  (93.2 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a flac Undegradable nuclear - too much Trap (group)_surround_5.1.flac"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Undegradable nuclear - too much Trap (group)_surround_5.1.flac  FLAC 5.1 Lossless  (25.0 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python write_metadata.py --dialnorm=-31"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 metadata embedded"
+            },
+            {
+              "t": "sep",
+              "m": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "ok",
+              "m": "  \ud83c\udf89 PIPELINE COMPLETE \u2014 click \u2b07 EXPORT FILES"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "f84b4e61-210f-4ea1-b13f-ed411c3535e1": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\f84b4e61-210f-4ea1-b13f-ed411c3535e1\\Toxic attachment - punchy lines.wav",
+    "filename": "Toxic attachment - punchy lines.wav",
+    "size_mb": 30.542152404785156,
+    "result": {
+      "status": "complete",
+      "output_dir": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\f84b4e61-210f-4ea1-b13f-ed411c3535e1",
+      "exported_files": [
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\f84b4e61-210f-4ea1-b13f-ed411c3535e1\\Toxic attachment - punchy lines_youtube.mp3",
+          "filename": "Toxic attachment - punchy lines_youtube.mp3",
+          "format": "MP3 320k",
+          "size_mb": 6.4,
+          "label": "YouTube Ready"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\f84b4e61-210f-4ea1-b13f-ed411c3535e1\\Toxic attachment - punchy lines_spotify.wav",
+          "filename": "Toxic attachment - punchy lines_spotify.wav",
+          "format": "WAV 24-bit",
+          "size_mb": 126.3,
+          "label": "Spotify Master"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\f84b4e61-210f-4ea1-b13f-ed411c3535e1\\Toxic attachment - punchy lines_surround_5.1.flac",
+          "filename": "Toxic attachment - punchy lines_surround_5.1.flac",
+          "format": "FLAC 5.1",
+          "size_mb": 28.9,
+          "label": "Pro 5.1 Surround"
+        }
+      ],
+      "stages": [
+        {
+          "stage_num": "01",
+          "name": "Input Preparation & Analysis",
+          "description": "Resample \u00b7 normalize \u00b7 spectral scan \u00b7 true-peak detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffprobe -v quiet -print_format json -show_streams Toxic attachment - punchy lines.wav"
+            },
+            {
+              "t": "info",
+              "m": "  sample_rate: 48000 | bit_depth: 16 | channels: 2 | duration: 2m46s"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Toxic attachment - punchy lines.wav -vn -ar 48000 -sample_fmt s16 -ac 2 Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 resample complete  44100\u219248000 Hz"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python analyze.py --true-peak --lufs"
+            },
+            {
+              "t": "info",
+              "m": "  integrated: -17.2 LUFS  |  true-peak: -3.7 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  stereo width: 0.17  |  LR correlation: 0.83"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 analysis complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "02",
+          "name": "Track Cutting",
+          "description": "Manual cut points or silence detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  \u2298 Track cutting skipped \u2014 using full audio"
+            }
+          ]
+        },
+        {
+          "stage_num": "03",
+          "name": "Stem Separation",
+          "description": "Demucs v4 \u00b7 6 stems",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ demucs --model htdemucs_6s Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "info",
+              "m": "  device: cpu"
+            },
+            {
+              "t": "info",
+              "m": "  loading model: htdemucs_6s"
+            },
+            {
+              "t": "info",
+              "m": "  loading audio..."
+            },
+            {
+              "t": "info",
+              "m": "  separating stems..."
+            },
+            {
+              "t": "info",
+              "m": "  drums.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  bass.wav     exported"
+            },
+            {
+              "t": "info",
+              "m": "  other.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  vocals.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  guitar.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  piano.wav    exported"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 6 stems separated"
+            }
+          ]
+        },
+        {
+          "stage_num": "04",
+          "name": "5.1 Channel Assignment & Spatial Upmix",
+          "description": "Stem routing \u00b7 pan law \u00b7 LFE crossover",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python upmix_51.py --stems stems/ --law itu775"
+            },
+            {
+              "t": "info",
+              "m": "  loaded vocals.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded drums.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded bass.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded guitar.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded piano.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded other.wav"
+            },
+            {
+              "t": "info",
+              "m": "  routing stems to channels..."
+            },
+            {
+              "t": "info",
+              "m": "  vocals \u2192 C (mono, \u22121.5 dB)"
+            },
+            {
+              "t": "info",
+              "m": "  bass   \u2192 LFE (111 Hz LP) gain 1.48x, L/R residual 0.31x"
+            },
+            {
+              "t": "info",
+              "m": "  drums  \u2192 L/R wide + Ls/Rs \u22126 dB"
+            },
+            {
+              "t": "info",
+              "m": "  guitar \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  piano \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  other  \u2192 Ls/Rs HF cut"
+            },
+            {
+              "t": "info",
+              "m": "  phase coherence check..."
+            },
+            {
+              "t": "info",
+              "m": "  phase L\u2194R: 0.85 \u2713  L\u2194Ls: 0.92 \u2713"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 5.1 upmix \u2192 output_51_raw.wav (6ch)"
+            }
+          ]
+        },
+        {
+          "stage_num": "05",
+          "name": "Pro Studio EQ, Dynamics & Color",
+          "description": "Console emulation \u00b7 tape \u00b7 bus comp \u00b7 exciter",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python studio_chain.py --preset spotify_rb --console ssl --tape 45 --comp 25"
+            },
+            {
+              "t": "info",
+              "m": "  processing 6 channels @ 44100Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [ALL] HPF 20 Hz Butterworth 4th"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] SSL 4000 G console model loaded"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tape sat 45%  2nd: +1.8 dB  3rd: +0.4 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] 2.0:1 attack 10ms release 100ms"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] LFE bypassed, sidechain HP 150 Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] cut harsh 3-4kHz range"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] shelf +4 dB @ 60 Hz  |  air +3 dB @ 14 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] mids +0 dB @ 400 Hz scoop"
+            },
+            {
+              "t": "info",
+              "m": "  [C] de-esser gr_max \u22123.8 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls/Rs] shelf \u22124 dB @ 12 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [VERB] surround reverb 40% (Ls/Rs 12%, L/R 6%)"
+            },
+            {
+              "t": "info",
+              "m": "  [WIDTH] stereo width 110% (wider)"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tube/tape saturation for loudness"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 studio processing complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "06",
+          "name": "Loudness Normalization (EBU R128)",
+          "description": "Integrated LUFS \u00b7 true-peak \u00b7 LRA",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i output_51_eq.wav -af ebur128=framelog=verbose -f null -"
+            },
+            {
+              "t": "info",
+              "m": "  measuring loudness per channel..."
+            },
+            {
+              "t": "info",
+              "m": "  [L  ]    -23.8 LUFS  TP: -1.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [R  ]    -24.4 LUFS  TP: -1.5 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [C  ]    -23.6 LUFS  TP: -4.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LFE]    -22.1 LUFS  TP: -0.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls ]    -30.1 LUFS  TP: -6.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Rs ]    -30.6 LUFS  TP: -6.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  integrated loudness: -17.7 LUFS"
+            },
+            {
+              "t": "info",
+              "m": "  applying makeup: +7.2 dB \u2192 -10.5 LUFS target"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 final: -10.5 LUFS  TP: -1.0 dBTP \u2713"
+            }
+          ]
+        },
+        {
+          "stage_num": "07",
+          "name": "Encode & Export",
+          "description": "6-ch WAV \u00b7 AC-3 \u00b7 DTS \u00b7 metadata embed",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  Mode: BASIC \u2014 generating 3 files"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a libmp3lame -b:a 320k -ar 48000 Toxic attachment - punchy lines_youtube.mp3"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_youtube.mp3  320 kbps stereo  (6.4 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 Toxic attachment - punchy lines_spotify.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_spotify.wav  48kHz 24-bit  (126.3 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a flac Toxic attachment - punchy lines_surround_5.1.flac"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_surround_5.1.flac  FLAC 5.1 Lossless  (28.9 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python write_metadata.py --dialnorm=-31"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 metadata embedded"
+            },
+            {
+              "t": "sep",
+              "m": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "ok",
+              "m": "  \ud83c\udf89 PIPELINE COMPLETE \u2014 click \u2b07 EXPORT FILES"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "84133215-4c2d-4a14-97c8-1cc918b5809f": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\84133215-4c2d-4a14-97c8-1cc918b5809f\\Toxic attachment - punchy lines.wav",
+    "filename": "Toxic attachment - punchy lines.wav",
+    "size_mb": 30.542152404785156,
+    "result": {
+      "status": "complete",
+      "output_dir": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\84133215-4c2d-4a14-97c8-1cc918b5809f",
+      "exported_files": [
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\84133215-4c2d-4a14-97c8-1cc918b5809f\\Toxic attachment - punchy lines_youtube.mp3",
+          "filename": "Toxic attachment - punchy lines_youtube.mp3",
+          "format": "MP3 320k",
+          "size_mb": 6.4,
+          "label": "YouTube Ready"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\84133215-4c2d-4a14-97c8-1cc918b5809f\\Toxic attachment - punchy lines_spotify.wav",
+          "filename": "Toxic attachment - punchy lines_spotify.wav",
+          "format": "WAV 24-bit",
+          "size_mb": 126.3,
+          "label": "Spotify Master"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\84133215-4c2d-4a14-97c8-1cc918b5809f\\Toxic attachment - punchy lines_surround_5.1.flac",
+          "filename": "Toxic attachment - punchy lines_surround_5.1.flac",
+          "format": "FLAC 5.1",
+          "size_mb": 29.1,
+          "label": "Pro 5.1 Surround"
+        }
+      ],
+      "stages": [
+        {
+          "stage_num": "01",
+          "name": "Input Preparation & Analysis",
+          "description": "Resample \u00b7 normalize \u00b7 spectral scan \u00b7 true-peak detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffprobe -v quiet -print_format json -show_streams Toxic attachment - punchy lines.wav"
+            },
+            {
+              "t": "info",
+              "m": "  sample_rate: 48000 | bit_depth: 16 | channels: 2 | duration: 2m46s"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Toxic attachment - punchy lines.wav -vn -ar 48000 -sample_fmt s16 -ac 2 Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 resample complete  44100\u219248000 Hz"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python analyze.py --true-peak --lufs"
+            },
+            {
+              "t": "info",
+              "m": "  integrated: -17.2 LUFS  |  true-peak: -3.7 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  stereo width: 0.17  |  LR correlation: 0.83"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 analysis complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "02",
+          "name": "Track Cutting",
+          "description": "Manual cut points or silence detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  \u2298 Track cutting skipped \u2014 using full audio"
+            }
+          ]
+        },
+        {
+          "stage_num": "03",
+          "name": "Stem Separation",
+          "description": "Demucs v4 \u00b7 6 stems",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ demucs --model htdemucs_6s Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "info",
+              "m": "  device: cpu"
+            },
+            {
+              "t": "info",
+              "m": "  loading model: htdemucs_6s"
+            },
+            {
+              "t": "info",
+              "m": "  loading audio..."
+            },
+            {
+              "t": "info",
+              "m": "  separating stems..."
+            },
+            {
+              "t": "info",
+              "m": "  drums.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  bass.wav     exported"
+            },
+            {
+              "t": "info",
+              "m": "  other.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  vocals.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  guitar.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  piano.wav    exported"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 6 stems separated"
+            }
+          ]
+        },
+        {
+          "stage_num": "04",
+          "name": "5.1 Channel Assignment & Spatial Upmix",
+          "description": "Stem routing \u00b7 pan law \u00b7 LFE crossover",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python upmix_51.py --stems stems/ --law itu775"
+            },
+            {
+              "t": "info",
+              "m": "  loaded vocals.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded drums.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded bass.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded guitar.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded piano.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded other.wav"
+            },
+            {
+              "t": "info",
+              "m": "  routing stems to channels..."
+            },
+            {
+              "t": "info",
+              "m": "  vocals \u2192 C (mono, \u22121.5 dB)"
+            },
+            {
+              "t": "info",
+              "m": "  bass   \u2192 LFE (111 Hz LP) gain 1.48x, L/R residual 0.31x"
+            },
+            {
+              "t": "info",
+              "m": "  drums  \u2192 L/R wide + Ls/Rs \u22126 dB"
+            },
+            {
+              "t": "info",
+              "m": "  guitar \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  piano \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  other  \u2192 Ls/Rs HF cut"
+            },
+            {
+              "t": "info",
+              "m": "  phase coherence check..."
+            },
+            {
+              "t": "info",
+              "m": "  phase L\u2194R: 0.85 \u2713  L\u2194Ls: 0.92 \u2713"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 5.1 upmix \u2192 output_51_raw.wav (6ch)"
+            }
+          ]
+        },
+        {
+          "stage_num": "05",
+          "name": "Pro Studio EQ, Dynamics & Color",
+          "description": "Console emulation \u00b7 tape \u00b7 bus comp \u00b7 exciter",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python studio_chain.py --preset spotify_rb --console ssl --tape 45 --comp 25"
+            },
+            {
+              "t": "info",
+              "m": "  processing 6 channels @ 44100Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [ALL] HPF 20 Hz Butterworth 4th"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] SSL 4000 G console model loaded"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tape sat 45%  2nd: +1.8 dB  3rd: +0.4 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] 2.0:1 attack 10ms release 100ms"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] LFE bypassed, sidechain HP 150 Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] cut harsh 3-4kHz range"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] shelf +4 dB @ 60 Hz  |  air +3 dB @ 14 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] mids +0 dB @ 400 Hz scoop"
+            },
+            {
+              "t": "info",
+              "m": "  [C] de-esser gr_max \u22123.8 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls/Rs] shelf \u22124 dB @ 12 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [VERB] surround reverb 40% (Ls/Rs 12%, L/R 6%)"
+            },
+            {
+              "t": "info",
+              "m": "  [WIDTH] stereo width 110% (wider)"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tube/tape saturation for loudness"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 studio processing complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "06",
+          "name": "Loudness Normalization (EBU R128)",
+          "description": "Integrated LUFS \u00b7 true-peak \u00b7 LRA",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i output_51_eq.wav -af ebur128=framelog=verbose -f null -"
+            },
+            {
+              "t": "info",
+              "m": "  measuring loudness per channel..."
+            },
+            {
+              "t": "info",
+              "m": "  [L  ]    -23.7 LUFS  TP: -1.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [R  ]    -24.3 LUFS  TP: -1.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [C  ]    -23.6 LUFS  TP: -4.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LFE]    -22.1 LUFS  TP: -0.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls ]    -30.0 LUFS  TP: -5.9 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Rs ]    -30.5 LUFS  TP: -6.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  integrated loudness: -17.6 LUFS"
+            },
+            {
+              "t": "info",
+              "m": "  applying makeup: +7.1 dB \u2192 -10.5 LUFS target"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 final: -10.5 LUFS  TP: -1.0 dBTP \u2713"
+            }
+          ]
+        },
+        {
+          "stage_num": "07",
+          "name": "Encode & Export",
+          "description": "6-ch WAV \u00b7 AC-3 \u00b7 DTS \u00b7 metadata embed",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  Mode: BASIC \u2014 generating 3 files"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a libmp3lame -b:a 320k -ar 48000 Toxic attachment - punchy lines_youtube.mp3"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_youtube.mp3  320 kbps stereo  (6.4 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 Toxic attachment - punchy lines_spotify.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_spotify.wav  48kHz 24-bit  (126.3 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a flac Toxic attachment - punchy lines_surround_5.1.flac"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_surround_5.1.flac  FLAC 5.1 Lossless  (29.1 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python write_metadata.py --dialnorm=-31"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 metadata embedded"
+            },
+            {
+              "t": "sep",
+              "m": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "ok",
+              "m": "  \ud83c\udf89 PIPELINE COMPLETE \u2014 click \u2b07 EXPORT FILES"
+            }
+          ]
+        },
+        {
+          "stage_num": "08",
+          "name": "Quality Assurance & Evaluation",
+          "description": "Measure final output LUFS \u00b7 True-Peak \u00b7 LRA report",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  evaluating master: Toxic attachment - punchy lines_spotify.wav"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Toxic attachment - punchy lines_spotify.wav -filter_complex ebur128=peak=true -f null -"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2500\u2500\u2500\u2500\u2500\u2500 MASTERING EVALUATION REPORT \u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "warn",
+              "m": "  Integrated LUFS: -70.0 (Target: -10.5, Error: -59.5)"
+            },
+            {
+              "t": "ok",
+              "m": "  Max True-Peak:   -1.0 dBTP (Limit: -1.0, Margin: +0.0 dB)"
+            },
+            {
+              "t": "warn",
+              "m": "  Loudness Range:  0.0 LU (Very compressed/squashed)"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "22d88303-2102-4a21-8ca1-ac80e7fc7091": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\22d88303-2102-4a21-8ca1-ac80e7fc7091\\Come to me... - Clean version.wav",
+    "filename": "Come to me... - Clean version.wav",
+    "size_mb": 44.604652404785156,
+    "result": {
+      "status": "complete",
+      "output_dir": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\22d88303-2102-4a21-8ca1-ac80e7fc7091",
+      "exported_files": [
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\22d88303-2102-4a21-8ca1-ac80e7fc7091\\Come to me... - Clean version_youtube.mp3",
+          "filename": "Come to me... - Clean version_youtube.mp3",
+          "format": "MP3 320k",
+          "size_mb": 9.3,
+          "label": "YouTube Ready"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\22d88303-2102-4a21-8ca1-ac80e7fc7091\\Come to me... - Clean version_spotify.wav",
+          "filename": "Come to me... - Clean version_spotify.wav",
+          "format": "WAV 24-bit",
+          "size_mb": 184.4,
+          "label": "Spotify Master"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\22d88303-2102-4a21-8ca1-ac80e7fc7091\\Come to me... - Clean version_surround_5.1.flac",
+          "filename": "Come to me... - Clean version_surround_5.1.flac",
+          "format": "FLAC 5.1",
+          "size_mb": 46.4,
+          "label": "Pro 5.1 Surround"
+        }
+      ],
+      "stages": [
+        {
+          "stage_num": "01",
+          "name": "Input Preparation & Analysis",
+          "description": "Resample \u00b7 normalize \u00b7 spectral scan \u00b7 true-peak detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffprobe -v quiet -print_format json -show_streams Come to me... - Clean version.wav"
+            },
+            {
+              "t": "info",
+              "m": "  sample_rate: 48000 | bit_depth: 16 | channels: 2 | duration: 4m03s"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Come to me... - Clean version.wav -vn -ar 48000 -sample_fmt s16 -ac 2 Come to me... - Clean version_48k.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 resample complete  44100\u219248000 Hz"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python analyze.py --true-peak --lufs"
+            },
+            {
+              "t": "info",
+              "m": "  integrated: -15.6 LUFS  |  true-peak: -2.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  stereo width: 0.56  |  LR correlation: 0.44"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 analysis complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "02",
+          "name": "Track Cutting",
+          "description": "Manual cut points or silence detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  \u2298 Track cutting skipped \u2014 using full audio"
+            }
+          ]
+        },
+        {
+          "stage_num": "03",
+          "name": "Stem Separation",
+          "description": "Demucs v4 \u00b7 6 stems",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ demucs --model htdemucs_6s Come to me... - Clean version_48k.wav"
+            },
+            {
+              "t": "info",
+              "m": "  device: cpu"
+            },
+            {
+              "t": "info",
+              "m": "  loading model: htdemucs_6s"
+            },
+            {
+              "t": "info",
+              "m": "  loading audio..."
+            },
+            {
+              "t": "info",
+              "m": "  separating stems..."
+            },
+            {
+              "t": "info",
+              "m": "  drums.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  bass.wav     exported"
+            },
+            {
+              "t": "info",
+              "m": "  other.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  vocals.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  guitar.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  piano.wav    exported"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 6 stems separated"
+            }
+          ]
+        },
+        {
+          "stage_num": "04",
+          "name": "5.1 Channel Assignment & Spatial Upmix",
+          "description": "Stem routing \u00b7 pan law \u00b7 LFE crossover",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python upmix_51.py --stems stems/ --law itu775"
+            },
+            {
+              "t": "info",
+              "m": "  loaded vocals.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded drums.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded bass.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded guitar.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded piano.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded other.wav"
+            },
+            {
+              "t": "info",
+              "m": "  routing stems to channels..."
+            },
+            {
+              "t": "info",
+              "m": "  vocals \u2192 C (mono, \u22121.5 dB)"
+            },
+            {
+              "t": "info",
+              "m": "  bass   \u2192 LFE (111 Hz LP) gain 1.48x, L/R residual 0.31x"
+            },
+            {
+              "t": "info",
+              "m": "  drums  \u2192 L/R wide + Ls/Rs \u22126 dB"
+            },
+            {
+              "t": "info",
+              "m": "  guitar \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  piano \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  other  \u2192 Ls/Rs HF cut"
+            },
+            {
+              "t": "info",
+              "m": "  phase coherence check..."
+            },
+            {
+              "t": "info",
+              "m": "  phase L\u2194R: -0.59 \u2713  L\u2194Ls: 0.32 \u2713"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 5.1 upmix \u2192 output_51_raw.wav (6ch)"
+            }
+          ]
+        },
+        {
+          "stage_num": "05",
+          "name": "Pro Studio EQ, Dynamics & Color",
+          "description": "Console emulation \u00b7 tape \u00b7 bus comp \u00b7 exciter",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python studio_chain.py --preset spotify_rb --console ssl --tape 45 --comp 25"
+            },
+            {
+              "t": "info",
+              "m": "  processing 6 channels @ 44100Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [ALL] HPF 20 Hz Butterworth 4th"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] SSL 4000 G console model loaded"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tape sat 45%  2nd: +1.8 dB  3rd: +0.4 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] 2.0:1 attack 10ms release 100ms"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] LFE bypassed, sidechain HP 150 Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] cut harsh 3-4kHz range"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] shelf +4 dB @ 60 Hz  |  air +3 dB @ 14 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] mids +0 dB @ 400 Hz scoop"
+            },
+            {
+              "t": "info",
+              "m": "  [C] de-esser gr_max \u22123.8 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls/Rs] shelf \u22124 dB @ 12 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [VERB] surround reverb 40% (Ls/Rs 12%, L/R 6%)"
+            },
+            {
+              "t": "info",
+              "m": "  [WIDTH] stereo width 110% (wider)"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tube/tape saturation for loudness"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 studio processing complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "06",
+          "name": "Loudness Normalization (EBU R128)",
+          "description": "Integrated LUFS \u00b7 true-peak \u00b7 LRA",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i output_51_eq.wav -af ebur128=framelog=verbose -f null -"
+            },
+            {
+              "t": "info",
+              "m": "  measuring loudness per channel..."
+            },
+            {
+              "t": "info",
+              "m": "  [L  ]    -25.3 LUFS  TP: -0.7 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [R  ]    -25.9 LUFS  TP: -0.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [C  ]    -23.2 LUFS  TP: -3.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LFE]    -21.9 LUFS  TP: -0.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls ]    -26.2 LUFS  TP: -4.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Rs ]    -26.6 LUFS  TP: -4.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  integrated loudness: -17.4 LUFS"
+            },
+            {
+              "t": "info",
+              "m": "  applying makeup: +6.9 dB \u2192 -10.5 LUFS target"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 final: -10.5 LUFS  TP: -1.0 dBTP \u2713"
+            }
+          ]
+        },
+        {
+          "stage_num": "07",
+          "name": "Encode & Export",
+          "description": "6-ch WAV \u00b7 AC-3 \u00b7 DTS \u00b7 metadata embed",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  Mode: BASIC \u2014 generating 3 files"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a libmp3lame -b:a 320k -ar 48000 Come to me... - Clean version_youtube.mp3"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Come to me... - Clean version_youtube.mp3  320 kbps stereo  (9.3 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 Come to me... - Clean version_spotify.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Come to me... - Clean version_spotify.wav  48kHz 24-bit  (184.4 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a flac Come to me... - Clean version_surround_5.1.flac"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Come to me... - Clean version_surround_5.1.flac  FLAC 5.1 Lossless  (46.4 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python write_metadata.py --dialnorm=-31"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 metadata embedded"
+            },
+            {
+              "t": "sep",
+              "m": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "ok",
+              "m": "  \ud83c\udf89 PIPELINE COMPLETE \u2014 click \u2b07 EXPORT FILES"
+            }
+          ]
+        },
+        {
+          "stage_num": "08",
+          "name": "Quality Assurance & Evaluation",
+          "description": "Measure final output LUFS \u00b7 True-Peak \u00b7 LRA report",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  evaluating master: Come to me... - Clean version_spotify.wav"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Come to me... - Clean version_spotify.wav -filter_complex ebur128=peak=true -f null -"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2500\u2500\u2500\u2500\u2500\u2500 MASTERING EVALUATION REPORT \u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "warn",
+              "m": "  Integrated LUFS: -70.0 (Target: -10.5, Error: -59.5)"
+            },
+            {
+              "t": "ok",
+              "m": "  Max True-Peak:   -1.0 dBTP (Limit: -1.0, Margin: +0.0 dB)"
+            },
+            {
+              "t": "warn",
+              "m": "  Loudness Range:  0.0 LU (Very compressed/squashed)"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "2ed52484-b0b8-4a11-beb1-e642ec7394eb": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\2ed52484-b0b8-4a11-beb1-e642ec7394eb\\Toxic attachment - punchy lines.wav",
+    "filename": "Toxic attachment - punchy lines.wav",
+    "size_mb": 30.542152404785156,
+    "result": {
+      "status": "complete",
+      "output_dir": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\2ed52484-b0b8-4a11-beb1-e642ec7394eb",
+      "exported_files": [
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\2ed52484-b0b8-4a11-beb1-e642ec7394eb\\Toxic attachment - punchy lines_youtube.mp3",
+          "filename": "Toxic attachment - punchy lines_youtube.mp3",
+          "format": "MP3 320k",
+          "size_mb": 6.4,
+          "label": "YouTube Ready"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\2ed52484-b0b8-4a11-beb1-e642ec7394eb\\Toxic attachment - punchy lines_spotify.wav",
+          "filename": "Toxic attachment - punchy lines_spotify.wav",
+          "format": "WAV 24-bit",
+          "size_mb": 126.3,
+          "label": "Spotify Master"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\2ed52484-b0b8-4a11-beb1-e642ec7394eb\\Toxic attachment - punchy lines_surround_5.1.flac",
+          "filename": "Toxic attachment - punchy lines_surround_5.1.flac",
+          "format": "FLAC 5.1",
+          "size_mb": 28.7,
+          "label": "Pro 5.1 Surround"
+        }
+      ],
+      "stages": [
+        {
+          "stage_num": "01",
+          "name": "Input Preparation & Analysis",
+          "description": "Resample \u00b7 normalize \u00b7 spectral scan \u00b7 true-peak detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffprobe -v quiet -print_format json -show_streams Toxic attachment - punchy lines.wav"
+            },
+            {
+              "t": "info",
+              "m": "  sample_rate: 48000 | bit_depth: 16 | channels: 2 | duration: 2m46s"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Toxic attachment - punchy lines.wav -vn -ar 48000 -sample_fmt s16 -ac 2 Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 resample complete  44100\u219248000 Hz"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python analyze.py --true-peak --lufs"
+            },
+            {
+              "t": "info",
+              "m": "  integrated: -17.2 LUFS  |  true-peak: -3.7 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  stereo width: 0.17  |  LR correlation: 0.83"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 analysis complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "02",
+          "name": "Track Cutting",
+          "description": "Manual cut points or silence detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  \u2298 Track cutting skipped \u2014 using full audio"
+            }
+          ]
+        },
+        {
+          "stage_num": "03",
+          "name": "Stem Separation",
+          "description": "Demucs v4 \u00b7 6 stems",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ demucs --model htdemucs_6s Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "info",
+              "m": "  device: cpu"
+            },
+            {
+              "t": "info",
+              "m": "  loading model: htdemucs_6s"
+            },
+            {
+              "t": "info",
+              "m": "  loading audio..."
+            },
+            {
+              "t": "info",
+              "m": "  separating stems..."
+            },
+            {
+              "t": "info",
+              "m": "  drums.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  bass.wav     exported"
+            },
+            {
+              "t": "info",
+              "m": "  other.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  vocals.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  guitar.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  piano.wav    exported"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 6 stems separated"
+            }
+          ]
+        },
+        {
+          "stage_num": "04",
+          "name": "5.1 Channel Assignment & Spatial Upmix",
+          "description": "Stem routing \u00b7 pan law \u00b7 LFE crossover",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python upmix_51.py --stems stems/ --law itu775"
+            },
+            {
+              "t": "info",
+              "m": "  loaded vocals.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded drums.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded bass.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded guitar.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded piano.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded other.wav"
+            },
+            {
+              "t": "info",
+              "m": "  routing stems to channels..."
+            },
+            {
+              "t": "info",
+              "m": "  vocals \u2192 C (mono, \u22121.5 dB)"
+            },
+            {
+              "t": "info",
+              "m": "  bass   \u2192 LFE (90 Hz LP) gain 1.25x, L/R residual 0.38x"
+            },
+            {
+              "t": "info",
+              "m": "  drums  \u2192 L/R wide + Ls/Rs \u22126 dB"
+            },
+            {
+              "t": "info",
+              "m": "  guitar \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  piano \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  other  \u2192 Ls/Rs HF cut"
+            },
+            {
+              "t": "info",
+              "m": "  phase coherence check..."
+            },
+            {
+              "t": "info",
+              "m": "  phase L\u2194R: 0.93 \u2713  L\u2194Ls: 0.64 \u2713"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 5.1 upmix \u2192 output_51_raw.wav (6ch)"
+            }
+          ]
+        },
+        {
+          "stage_num": "05",
+          "name": "Pro Studio EQ, Dynamics & Color",
+          "description": "Console emulation \u00b7 tape \u00b7 bus comp \u00b7 exciter",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python studio_chain.py --preset pop --console ssl --tape 35 --comp 45"
+            },
+            {
+              "t": "info",
+              "m": "  processing 6 channels @ 44100Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [ALL] HPF 20 Hz Butterworth 4th"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] SSL 4000 G console model loaded"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tape sat 35%  2nd: +1.8 dB  3rd: +0.4 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] 4.2:1 attack 10ms release 100ms"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] LFE bypassed, sidechain HP 150 Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] shelf +3 dB @ 60 Hz  |  air +4 dB @ 14 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] mids -2 dB @ 400 Hz scoop"
+            },
+            {
+              "t": "info",
+              "m": "  [C] de-esser gr_max \u22123.8 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls/Rs] shelf \u22124 dB @ 12 kHz"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 studio processing complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "06",
+          "name": "Loudness Normalization (EBU R128)",
+          "description": "Integrated LUFS \u00b7 true-peak \u00b7 LRA",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i output_51_eq.wav -af ebur128=framelog=verbose -f null -"
+            },
+            {
+              "t": "info",
+              "m": "  measuring loudness per channel..."
+            },
+            {
+              "t": "info",
+              "m": "  [L  ]    -25.7 LUFS  TP: -2.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [R  ]    -26.2 LUFS  TP: -2.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [C  ]    -26.7 LUFS  TP: -6.6 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LFE]    -27.1 LUFS  TP: -3.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls ]    -32.3 LUFS  TP: -7.6 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Rs ]    -33.0 LUFS  TP: -7.6 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  integrated loudness: -20.3 LUFS"
+            },
+            {
+              "t": "info",
+              "m": "  applying makeup: +6.3 dB \u2192 -14.0 LUFS target"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 final: -14.0 LUFS  TP: -1.0 dBTP \u2713"
+            }
+          ]
+        },
+        {
+          "stage_num": "07",
+          "name": "Encode & Export",
+          "description": "6-ch WAV \u00b7 AC-3 \u00b7 DTS \u00b7 metadata embed",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  Mode: BASIC \u2014 generating 3 files"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a libmp3lame -b:a 320k -ar 48000 Toxic attachment - punchy lines_youtube.mp3"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_youtube.mp3  320 kbps stereo  (6.4 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 Toxic attachment - punchy lines_spotify.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_spotify.wav  48kHz 24-bit  (126.3 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a flac Toxic attachment - punchy lines_surround_5.1.flac"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_surround_5.1.flac  FLAC 5.1 Lossless  (28.7 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python write_metadata.py --dialnorm=-31"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 metadata embedded"
+            },
+            {
+              "t": "sep",
+              "m": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "ok",
+              "m": "  \ud83c\udf89 PIPELINE COMPLETE \u2014 click \u2b07 EXPORT FILES"
+            }
+          ]
+        },
+        {
+          "stage_num": "08",
+          "name": "Quality Assurance & Evaluation",
+          "description": "Measure final output LUFS \u00b7 True-Peak \u00b7 LRA report",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  evaluating master: Toxic attachment - punchy lines_spotify.wav"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Toxic attachment - punchy lines_spotify.wav -filter_complex ebur128=peak=true -f null -"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2500\u2500\u2500\u2500\u2500\u2500 MASTERING EVALUATION REPORT \u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "warn",
+              "m": "  Integrated LUFS: -70.0 (Target: -14.0, Error: -56.0)"
+            },
+            {
+              "t": "ok",
+              "m": "  Max True-Peak:   -1.0 dBTP (Limit: -1.0, Margin: +0.0 dB)"
+            },
+            {
+              "t": "warn",
+              "m": "  Loudness Range:  0.0 LU (Very compressed/squashed)"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "4b26a7c7-7dac-4978-9cdf-ecb5f2777e80": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\4b26a7c7-7dac-4978-9cdf-ecb5f2777e80\\Toxic attachment - punchy lines.wav",
+    "filename": "Toxic attachment - punchy lines.wav",
+    "size_mb": 30.542152404785156,
+    "result": {
+      "status": "complete",
+      "output_dir": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\4b26a7c7-7dac-4978-9cdf-ecb5f2777e80",
+      "exported_files": [
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\4b26a7c7-7dac-4978-9cdf-ecb5f2777e80\\Toxic attachment - punchy lines_youtube.mp3",
+          "filename": "Toxic attachment - punchy lines_youtube.mp3",
+          "format": "MP3 320k",
+          "size_mb": 6.4,
+          "label": "YouTube Ready"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\4b26a7c7-7dac-4978-9cdf-ecb5f2777e80\\Toxic attachment - punchy lines_spotify.wav",
+          "filename": "Toxic attachment - punchy lines_spotify.wav",
+          "format": "WAV 24-bit",
+          "size_mb": 45.8,
+          "label": "Spotify Master"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\4b26a7c7-7dac-4978-9cdf-ecb5f2777e80\\Toxic attachment - punchy lines_surround_5.1.flac",
+          "filename": "Toxic attachment - punchy lines_surround_5.1.flac",
+          "format": "FLAC 5.1",
+          "size_mb": 32.6,
+          "label": "Pro 5.1 Surround"
+        }
+      ],
+      "stages": [
+        {
+          "stage_num": "01",
+          "name": "Input Preparation & Analysis",
+          "description": "Resample \u00b7 normalize \u00b7 spectral scan \u00b7 true-peak detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffprobe -v quiet -print_format json -show_streams Toxic attachment - punchy lines.wav"
+            },
+            {
+              "t": "info",
+              "m": "  sample_rate: 48000 | bit_depth: 16 | channels: 2 | duration: 2m46s"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Toxic attachment - punchy lines.wav -vn -ar 48000 -sample_fmt s16 -ac 2 Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 resample complete  44100\u219248000 Hz"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python analyze.py --true-peak --lufs"
+            },
+            {
+              "t": "info",
+              "m": "  integrated: -17.2 LUFS  |  true-peak: -3.7 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  stereo width: 0.17  |  LR correlation: 0.83"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 analysis complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "02",
+          "name": "Track Cutting",
+          "description": "Manual cut points or silence detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  \u2298 Track cutting skipped \u2014 using full audio"
+            }
+          ]
+        },
+        {
+          "stage_num": "03",
+          "name": "Stem Separation",
+          "description": "Demucs v4 \u00b7 6 stems",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ demucs --model htdemucs_6s Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "info",
+              "m": "  device: cpu"
+            },
+            {
+              "t": "info",
+              "m": "  loading model: htdemucs_6s"
+            },
+            {
+              "t": "info",
+              "m": "  loading audio..."
+            },
+            {
+              "t": "info",
+              "m": "  separating stems..."
+            },
+            {
+              "t": "info",
+              "m": "  drums.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  bass.wav     exported"
+            },
+            {
+              "t": "info",
+              "m": "  other.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  vocals.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  guitar.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  piano.wav    exported"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 6 stems separated"
+            }
+          ]
+        },
+        {
+          "stage_num": "04",
+          "name": "5.1 Channel Assignment & Spatial Upmix",
+          "description": "Stem routing \u00b7 pan law \u00b7 LFE crossover",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python upmix_51.py --stems stems/ --law itu775"
+            },
+            {
+              "t": "info",
+              "m": "  loaded vocals.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded drums.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded bass.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded guitar.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded piano.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded other.wav"
+            },
+            {
+              "t": "info",
+              "m": "  routing stems to channels..."
+            },
+            {
+              "t": "info",
+              "m": "  vocals \u2192 C (mono, \u22121.5 dB)"
+            },
+            {
+              "t": "info",
+              "m": "  bass   \u2192 LFE (111 Hz LP) gain 1.48x, L/R residual 0.31x"
+            },
+            {
+              "t": "info",
+              "m": "  drums  \u2192 L/R wide + Ls/Rs \u22126 dB"
+            },
+            {
+              "t": "info",
+              "m": "  guitar \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  piano \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  other  \u2192 Ls/Rs HF cut"
+            },
+            {
+              "t": "info",
+              "m": "  phase coherence check..."
+            },
+            {
+              "t": "info",
+              "m": "  phase L\u2194R: 0.91 \u2713  L\u2194Ls: 0.72 \u2713"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 5.1 upmix \u2192 output_51_raw.wav (6ch)"
+            }
+          ]
+        },
+        {
+          "stage_num": "05",
+          "name": "Pro Studio EQ, Dynamics & Color",
+          "description": "Console emulation \u00b7 tape \u00b7 bus comp \u00b7 exciter",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python studio_chain.py --preset spotify_rb --console ssl --tape 45 --comp 25"
+            },
+            {
+              "t": "info",
+              "m": "  processing 6 channels @ 44100Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [ALL] HPF 30 Hz Butterworth 4th"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] SSL 4000 G console model loaded"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tape sat 45%  2nd: +1.8 dB  3rd: +0.4 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] 2.0:1 attack 10ms release 100ms"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] LFE bypassed, sidechain HP 150 Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] cut harsh 3-4kHz range"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] shelf +4 dB @ 60 Hz  |  air +3 dB @ 14 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] mids +0 dB @ 400 Hz scoop"
+            },
+            {
+              "t": "info",
+              "m": "  [C] de-esser gr_max \u22123.8 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls/Rs] shelf \u22124 dB @ 12 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [VERB] surround reverb 40% (Ls/Rs 12%, L/R 6%)"
+            },
+            {
+              "t": "info",
+              "m": "  [WIDTH] stereo width 110% (wider)"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tube/tape saturation for loudness"
+            },
+            {
+              "t": "info",
+              "m": "  [DYN] fast-attack transient control active"
+            },
+            {
+              "t": "info",
+              "m": "  [DYN] forced -3dB peak ceiling before final stage"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 studio processing complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "06",
+          "name": "Loudness Normalization (EBU R128)",
+          "description": "Integrated LUFS \u00b7 true-peak \u00b7 LRA",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i output_51_eq.wav -af ebur128=framelog=verbose -f null -"
+            },
+            {
+              "t": "info",
+              "m": "  measuring loudness per channel..."
+            },
+            {
+              "t": "info",
+              "m": "  [L  ]    -25.5 LUFS  TP: -3.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [R  ]    -25.9 LUFS  TP: -3.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [C  ]    -25.6 LUFS  TP: -6.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LFE]    -24.1 LUFS  TP: -3.2 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls ]    -32.0 LUFS  TP: -7.5 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Rs ]    -32.6 LUFS  TP: -7.5 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LIMITER] overshoot 7.0dB exceeds 4dB. Dropping input gain by 3.0dB"
+            },
+            {
+              "t": "info",
+              "m": "  integrated loudness: -19.5 LUFS"
+            },
+            {
+              "t": "info",
+              "m": "  applying makeup: +6.0 dB \u2192 -10.5 LUFS target"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 final: -10.5 LUFS  TP: -1.7 dBTP \u2713"
+            }
+          ]
+        },
+        {
+          "stage_num": "07",
+          "name": "Encode & Export",
+          "description": "6-ch WAV \u00b7 AC-3 \u00b7 DTS \u00b7 metadata embed",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  Mode: BASIC \u2014 generating 3 files"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a libmp3lame -b:a 320k -ar 48000 Toxic attachment - punchy lines_youtube.mp3"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_youtube.mp3  320 kbps stereo  (6.4 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 Toxic attachment - punchy lines_spotify.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_spotify.wav  48kHz 24-bit stereo  (45.8 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a flac Toxic attachment - punchy lines_surround_5.1.flac"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_surround_5.1.flac  FLAC 5.1 Lossless  (32.6 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python write_metadata.py --dialnorm=-31"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 metadata embedded"
+            },
+            {
+              "t": "sep",
+              "m": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "ok",
+              "m": "  \ud83c\udf89 PIPELINE COMPLETE \u2014 click \u2b07 EXPORT FILES"
+            }
+          ]
+        },
+        {
+          "stage_num": "08",
+          "name": "Quality Assurance & Evaluation",
+          "description": "Measure final output LUFS \u00b7 True-Peak \u00b7 LRA report",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  evaluating master: Toxic attachment - punchy lines_spotify.wav"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Toxic attachment - punchy lines_spotify.wav -filter_complex ebur128=peak=true -f null -"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2500\u2500\u2500\u2500\u2500\u2500 MASTERING EVALUATION REPORT \u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "warn",
+              "m": "  Integrated LUFS: -70.0 (Target: -10.5, Error: -59.5)"
+            },
+            {
+              "t": "ok",
+              "m": "  Max True-Peak:   -4.4 dBTP (Limit: -1.0, Margin: +3.4 dB)"
+            },
+            {
+              "t": "warn",
+              "m": "  Loudness Range:  0.0 LU (Very compressed/squashed)"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "73f1e01e-4165-47b7-b3f6-61867d629103": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\73f1e01e-4165-47b7-b3f6-61867d629103\\Toxic attachment - punchy lines.wav",
+    "filename": "Toxic attachment - punchy lines.wav",
+    "size_mb": 30.542152404785156
+  },
+  "9174df93-2d09-4243-b304-f5143074d42f": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\9174df93-2d09-4243-b304-f5143074d42f\\Toxic attachment.wav",
+    "filename": "Toxic attachment.wav",
+    "size_mb": 30.542152404785156,
+    "result": {
+      "status": "aborted",
+      "error": "Processing was aborted by user"
+    }
+  },
+  "7b8ead95-4a64-43c5-9344-2fa079323543": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\7b8ead95-4a64-43c5-9344-2fa079323543\\Toxic attachment - punchy lines.wav",
+    "filename": "Toxic attachment - punchy lines.wav",
+    "size_mb": 30.542152404785156,
+    "result": {
+      "status": "complete",
+      "output_dir": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\7b8ead95-4a64-43c5-9344-2fa079323543",
+      "exported_files": [
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\7b8ead95-4a64-43c5-9344-2fa079323543\\Toxic attachment - punchy lines_youtube.mp3",
+          "filename": "Toxic attachment - punchy lines_youtube.mp3",
+          "format": "MP3 320k",
+          "size_mb": 6.4,
+          "label": "YouTube Ready"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\7b8ead95-4a64-43c5-9344-2fa079323543\\Toxic attachment - punchy lines_spotify.wav",
+          "filename": "Toxic attachment - punchy lines_spotify.wav",
+          "format": "WAV 24-bit",
+          "size_mb": 45.8,
+          "label": "Spotify Master"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\7b8ead95-4a64-43c5-9344-2fa079323543\\Toxic attachment - punchy lines_surround_5.1.flac",
+          "filename": "Toxic attachment - punchy lines_surround_5.1.flac",
+          "format": "FLAC 5.1",
+          "size_mb": 31.5,
+          "label": "Pro 5.1 Surround"
+        }
+      ],
+      "stages": [
+        {
+          "stage_num": "01",
+          "name": "Input Preparation & Analysis",
+          "description": "Resample \u00b7 normalize \u00b7 spectral scan \u00b7 true-peak detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffprobe -v quiet -print_format json -show_streams Toxic attachment - punchy lines.wav"
+            },
+            {
+              "t": "info",
+              "m": "  sample_rate: 48000 | bit_depth: 16 | channels: 2 | duration: 2m46s"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Toxic attachment - punchy lines.wav -vn -ar 48000 -sample_fmt s16 -ac 2 Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 resample complete  44100\u219248000 Hz"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python analyze.py --true-peak --lufs"
+            },
+            {
+              "t": "info",
+              "m": "  integrated: -17.2 LUFS  |  true-peak: -3.7 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  stereo width: 0.17  |  LR correlation: 0.83"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 analysis complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "02",
+          "name": "Track Cutting",
+          "description": "Manual cut points or silence detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  \u2298 Track cutting skipped \u2014 using full audio"
+            }
+          ]
+        },
+        {
+          "stage_num": "03",
+          "name": "Stem Separation",
+          "description": "Demucs v4 \u00b7 6 stems",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ demucs --model htdemucs_6s Toxic attachment - punchy lines_48k.wav"
+            },
+            {
+              "t": "info",
+              "m": "  device: cpu"
+            },
+            {
+              "t": "info",
+              "m": "  loading model: htdemucs_6s"
+            },
+            {
+              "t": "info",
+              "m": "  loading audio..."
+            },
+            {
+              "t": "info",
+              "m": "  separating stems..."
+            },
+            {
+              "t": "info",
+              "m": "  drums.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  bass.wav     exported"
+            },
+            {
+              "t": "info",
+              "m": "  other.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  vocals.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  guitar.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  piano.wav    exported"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 6 stems separated"
+            }
+          ]
+        },
+        {
+          "stage_num": "04",
+          "name": "5.1 Channel Assignment & Spatial Upmix",
+          "description": "Stem routing \u00b7 pan law \u00b7 LFE crossover",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python upmix_51.py --stems stems/ --law itu775"
+            },
+            {
+              "t": "info",
+              "m": "  loaded vocals.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded drums.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded bass.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded guitar.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded piano.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded other.wav"
+            },
+            {
+              "t": "info",
+              "m": "  routing stems to channels..."
+            },
+            {
+              "t": "info",
+              "m": "  vocals \u2192 C (mono, \u22121.5 dB)"
+            },
+            {
+              "t": "info",
+              "m": "  bass   \u2192 LFE (90 Hz LP) gain 1.25x, L/R residual 0.38x"
+            },
+            {
+              "t": "info",
+              "m": "  drums  \u2192 L/R wide + Ls/Rs \u22126 dB"
+            },
+            {
+              "t": "info",
+              "m": "  guitar \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  piano \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  other  \u2192 Ls/Rs HF cut"
+            },
+            {
+              "t": "info",
+              "m": "  phase coherence check..."
+            },
+            {
+              "t": "info",
+              "m": "  phase L\u2194R: 0.93 \u2713  L\u2194Ls: 0.65 \u2713"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 5.1 upmix \u2192 output_51_raw.wav (6ch)"
+            }
+          ]
+        },
+        {
+          "stage_num": "05",
+          "name": "Pro Studio EQ, Dynamics & Color",
+          "description": "Console emulation \u00b7 tape \u00b7 bus comp \u00b7 exciter",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python studio_chain.py --preset pop --console ssl --tape 35 --comp 45"
+            },
+            {
+              "t": "info",
+              "m": "  processing 6 channels @ 44100Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [ALL] HPF 30 Hz Butterworth 4th"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] SSL 4000 G console model loaded"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tape sat 35%  2nd: +1.8 dB  3rd: +0.4 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] 4.2:1 attack 10ms release 100ms"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] LFE bypassed, sidechain HP 150 Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] shelf +3 dB @ 60 Hz  |  air +4 dB @ 14 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] mids -2 dB @ 400 Hz scoop"
+            },
+            {
+              "t": "info",
+              "m": "  [C] de-esser gr_max \u22123.8 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls/Rs] shelf \u22124 dB @ 12 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [DYN] fast-attack transient control active"
+            },
+            {
+              "t": "info",
+              "m": "  [DYN] forced -3dB peak ceiling before final stage"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 studio processing complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "06",
+          "name": "Loudness Normalization (EBU R128)",
+          "description": "Integrated LUFS \u00b7 true-peak \u00b7 LRA",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i output_51_eq.wav -af ebur128=framelog=verbose -f null -"
+            },
+            {
+              "t": "info",
+              "m": "  measuring loudness per channel..."
+            },
+            {
+              "t": "info",
+              "m": "  [L  ]    -27.2 LUFS  TP: -3.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [R  ]    -27.7 LUFS  TP: -3.2 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [C  ]    -28.1 LUFS  TP: -8.1 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LFE]    -28.9 LUFS  TP: -6.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls ]    -33.8 LUFS  TP: -8.3 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Rs ]    -34.5 LUFS  TP: -8.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LIMITER] overshoot 5.8dB exceeds 4dB. Dropping input gain by 1.8dB"
+            },
+            {
+              "t": "info",
+              "m": "  integrated loudness: -21.8 LUFS"
+            },
+            {
+              "t": "info",
+              "m": "  applying makeup: +6.0 dB \u2192 -14.0 LUFS target"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 final: -14.0 LUFS  TP: -1.7 dBTP \u2713"
+            }
+          ]
+        },
+        {
+          "stage_num": "07",
+          "name": "Encode & Export",
+          "description": "6-ch WAV \u00b7 AC-3 \u00b7 DTS \u00b7 metadata embed",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  Mode: BASIC \u2014 generating 3 files"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a libmp3lame -b:a 320k -ar 48000 Toxic attachment - punchy lines_youtube.mp3"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_youtube.mp3  320 kbps stereo  (6.4 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 Toxic attachment - punchy lines_spotify.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_spotify.wav  48kHz 24-bit stereo  (45.8 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a flac Toxic attachment - punchy lines_surround_5.1.flac"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Toxic attachment - punchy lines_surround_5.1.flac  FLAC 5.1 Lossless  (31.5 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python write_metadata.py --dialnorm=-31"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 metadata embedded"
+            },
+            {
+              "t": "sep",
+              "m": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "ok",
+              "m": "  \ud83c\udf89 PIPELINE COMPLETE \u2014 click \u2b07 EXPORT FILES"
+            }
+          ]
+        },
+        {
+          "stage_num": "08",
+          "name": "Quality Assurance & Evaluation",
+          "description": "Measure final output LUFS \u00b7 True-Peak \u00b7 LRA report",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  evaluating master: Toxic attachment - punchy lines_spotify.wav"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Toxic attachment - punchy lines_spotify.wav -filter_complex ebur128=peak=true -f null -"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2500\u2500\u2500\u2500\u2500\u2500 MASTERING EVALUATION REPORT \u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "warn",
+              "m": "  Integrated LUFS: -70.0 (Target: -14.0, Error: -56.0)"
+            },
+            {
+              "t": "ok",
+              "m": "  Max True-Peak:   -5.0 dBTP (Limit: -1.0, Margin: +4.0 dB)"
+            },
+            {
+              "t": "warn",
+              "m": "  Loudness Range:  0.0 LU (Very compressed/squashed)"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "6d67af7d-f4e2-486c-88ef-5c2bcbaa1267": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\6d67af7d-f4e2-486c-88ef-5c2bcbaa1267\\Toxic attachment - punchy lines.wav",
+    "filename": "Toxic attachment - punchy lines.wav",
+    "size_mb": 30.542152404785156,
+    "result": {
+      "status": "aborted",
+      "error": "Processing was aborted by user"
+    }
+  },
+  "ba2565b1-65a5-4680-a819-78e955d544f4": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\ba2565b1-65a5-4680-a819-78e955d544f4\\Toxic attachment - punchy lines.wav",
+    "filename": "Toxic attachment - punchy lines.wav",
+    "size_mb": 30.542152404785156,
+    "result": {
+      "status": "error",
+      "error": "",
+      "stage": 6
+    }
+  },
+  "d1768320-d738-411f-961f-d728e350082e": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\d1768320-d738-411f-961f-d728e350082e\\Toxic attachment - punchy lines.wav",
+    "filename": "Toxic attachment - punchy lines.wav",
+    "size_mb": 30.542152404785156,
+    "result": {
+      "status": "error",
+      "error": "",
+      "stage": 6
+    }
+  },
+  "edd46924-8650-4015-8c5b-1b2ca93522b8": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\edd46924-8650-4015-8c5b-1b2ca93522b8\\Toxic attachment - punchy lines.wav",
+    "filename": "Toxic attachment - punchy lines.wav",
+    "size_mb": 30.542152404785156,
+    "result": {
+      "status": "error",
+      "error": "ffmpeg MP3 export failed: ",
+      "stage": 6
+    }
+  },
+  "c73b43eb-a8f4-4e1a-86d3-cf5667596355": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\c73b43eb-a8f4-4e1a-86d3-cf5667596355\\Toxic attachment - punchy lines.wav",
+    "filename": "Toxic attachment - punchy lines.wav",
+    "size_mb": 30.542152404785156,
+    "result": {
+      "status": "error",
+      "error": "ffmpeg MP3 export failed: ",
+      "stage": 6
+    }
+  },
+  "be1cfdb7-28a7-44d5-b9a0-fc6e0b9ac149": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\be1cfdb7-28a7-44d5-b9a0-fc6e0b9ac149\\Undegradable Bitch- to publish.wav",
+    "filename": "Undegradable Bitch- to publish.wav",
+    "size_mb": 27.605140686035156,
+    "result": {
+      "status": "complete",
+      "output_dir": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\be1cfdb7-28a7-44d5-b9a0-fc6e0b9ac149",
+      "exported_files": [
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\be1cfdb7-28a7-44d5-b9a0-fc6e0b9ac149\\Undegradable Bitch- to publish_youtube.mp3",
+          "filename": "Undegradable Bitch- to publish_youtube.mp3",
+          "format": "MP3 320k",
+          "size_mb": 5.8,
+          "label": "YouTube Ready"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\be1cfdb7-28a7-44d5-b9a0-fc6e0b9ac149\\Undegradable Bitch- to publish_spotify.wav",
+          "filename": "Undegradable Bitch- to publish_spotify.wav",
+          "format": "WAV 24-bit",
+          "size_mb": 41.4,
+          "label": "Spotify Master"
+        },
+        {
+          "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\be1cfdb7-28a7-44d5-b9a0-fc6e0b9ac149\\Undegradable Bitch- to publish_surround_5.1.flac",
+          "filename": "Undegradable Bitch- to publish_surround_5.1.flac",
+          "format": "FLAC 5.1",
+          "size_mb": 29.0,
+          "label": "Pro 5.1 Surround"
+        }
+      ],
+      "stages": [
+        {
+          "stage_num": "01",
+          "name": "Input Preparation & Analysis",
+          "description": "Resample \u00b7 normalize \u00b7 spectral scan \u00b7 true-peak detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffprobe -v quiet -print_format json -show_streams Undegradable Bitch- to publish.wav"
+            },
+            {
+              "t": "info",
+              "m": "  sample_rate: 48000 | bit_depth: 16 | channels: 2 | duration: 2m30s"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Undegradable Bitch- to publish.wav -vn -ar 48000 -sample_fmt s16 -ac 2 Undegradable Bitch- to publish_48k.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 resample complete  44100\u219248000 Hz"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python analyze.py --true-peak --lufs"
+            },
+            {
+              "t": "info",
+              "m": "  integrated: -16.2 LUFS  |  true-peak: -2.4 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  stereo width: 0.04  |  LR correlation: 0.96"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 analysis complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "02",
+          "name": "Track Cutting",
+          "description": "Manual cut points or silence detection",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  \u2298 Track cutting skipped \u2014 using full audio"
+            }
+          ]
+        },
+        {
+          "stage_num": "03",
+          "name": "Stem Separation",
+          "description": "Demucs v4 \u00b7 6 stems",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ demucs --model htdemucs_6s Undegradable Bitch- to publish_48k.wav"
+            },
+            {
+              "t": "info",
+              "m": "  device: cpu"
+            },
+            {
+              "t": "info",
+              "m": "  loading model: htdemucs_6s"
+            },
+            {
+              "t": "info",
+              "m": "  loading audio..."
+            },
+            {
+              "t": "info",
+              "m": "  separating stems..."
+            },
+            {
+              "t": "info",
+              "m": "  drums.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  bass.wav     exported"
+            },
+            {
+              "t": "info",
+              "m": "  other.wav    exported"
+            },
+            {
+              "t": "info",
+              "m": "  vocals.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  guitar.wav   exported"
+            },
+            {
+              "t": "info",
+              "m": "  piano.wav    exported"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 6 stems separated"
+            }
+          ]
+        },
+        {
+          "stage_num": "04",
+          "name": "5.1 Channel Assignment & Spatial Upmix",
+          "description": "Stem routing \u00b7 pan law \u00b7 LFE crossover",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python upmix_51.py --stems stems/ --law itu775"
+            },
+            {
+              "t": "info",
+              "m": "  loaded vocals.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded drums.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded bass.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded guitar.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded piano.wav"
+            },
+            {
+              "t": "info",
+              "m": "  loaded other.wav"
+            },
+            {
+              "t": "info",
+              "m": "  routing stems to channels..."
+            },
+            {
+              "t": "info",
+              "m": "  vocals \u2192 C (mono, \u22121.5 dB)"
+            },
+            {
+              "t": "info",
+              "m": "  bass   \u2192 LFE (111 Hz LP) gain 1.48x, L/R residual 0.31x"
+            },
+            {
+              "t": "info",
+              "m": "  drums  \u2192 L/R wide + Ls/Rs \u22126 dB"
+            },
+            {
+              "t": "info",
+              "m": "  guitar \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  piano \u2192 L/R stereo"
+            },
+            {
+              "t": "info",
+              "m": "  other  \u2192 Ls/Rs HF cut"
+            },
+            {
+              "t": "info",
+              "m": "  phase coherence check..."
+            },
+            {
+              "t": "info",
+              "m": "  phase L\u2194R: 1.00 \u26a0  L\u2194Ls: 0.96 \u2713"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 5.1 upmix \u2192 output_51_raw.wav (6ch)"
+            }
+          ]
+        },
+        {
+          "stage_num": "05",
+          "name": "Pro Studio EQ, Dynamics & Color",
+          "description": "Console emulation \u00b7 tape \u00b7 bus comp \u00b7 exciter",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ python studio_chain.py --preset spotify_rb --console ssl --tape 45 --comp 25"
+            },
+            {
+              "t": "info",
+              "m": "  processing 6 channels @ 44100Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [ALL] HPF 30 Hz Butterworth 4th"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] SSL 4000 G console model loaded"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] tape sat 45%  2nd: +1.8 dB  3rd: +0.4 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] 2.0:1 attack 10ms release 100ms"
+            },
+            {
+              "t": "info",
+              "m": "  [COMP] LFE bypassed, sidechain HP 150 Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] cut harsh 3-4kHz range"
+            },
+            {
+              "t": "info",
+              "m": "  [EQ] shelf +4 dB @ 60 Hz  |  air +3 dB @ 14 kHz  |  mids +0 dB @ 400 Hz"
+            },
+            {
+              "t": "info",
+              "m": "  [C] de-esser gr_max \u22123.8 dB"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls/Rs] shelf \u22124 dB @ 12 kHz"
+            },
+            {
+              "t": "info",
+              "m": "  [VERB] surround reverb 40% (Ls/Rs 12%, L/R 6%)"
+            },
+            {
+              "t": "info",
+              "m": "  [WIDTH] stereo width 110% (wider)"
+            },
+            {
+              "t": "info",
+              "m": "  [COLOR] light extra saturation pass (capped 0.4)"
+            },
+            {
+              "t": "info",
+              "m": "  [DYN] forced -3dB peak ceiling before final stage"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 studio processing complete"
+            }
+          ]
+        },
+        {
+          "stage_num": "06",
+          "name": "Loudness Normalization (EBU R128)",
+          "description": "Integrated LUFS \u00b7 true-peak \u00b7 LRA",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i output_51_eq.wav -af ebur128=framelog=verbose -f null -"
+            },
+            {
+              "t": "info",
+              "m": "  measuring loudness per channel..."
+            },
+            {
+              "t": "info",
+              "m": "  [L  ]    -25.4 LUFS  TP: -4.5 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [R  ]    -25.4 LUFS  TP: -4.5 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [C  ]    -23.2 LUFS  TP: -5.5 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LFE]    -25.9 LUFS  TP: -3.0 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Ls ]    -31.9 LUFS  TP: -9.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [Rs ]    -32.0 LUFS  TP: -9.8 dBTP"
+            },
+            {
+              "t": "info",
+              "m": "  [LIMITER] overshoot 6.3dB exceeds 4dB. Dropping input gain by 2.3dB"
+            },
+            {
+              "t": "info",
+              "m": "  integrated loudness: -18.8 LUFS"
+            },
+            {
+              "t": "info",
+              "m": "  applying makeup: +6.0 dB \u2192 -10.5 LUFS target"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 final: -10.5 LUFS  TP: -1.0 dBTP \u2713"
+            }
+          ]
+        },
+        {
+          "stage_num": "07",
+          "name": "Encode & Export",
+          "description": "6-ch WAV \u00b7 AC-3 \u00b7 DTS \u00b7 metadata embed",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  Mode: BASIC \u2014 generating 3 files"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a libmp3lame -b:a 320k -ar 48000 Undegradable Bitch- to publish_youtube.mp3"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Undegradable Bitch- to publish_youtube.mp3  320 kbps stereo  (5.8 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 Undegradable Bitch- to publish_spotify.wav"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Undegradable Bitch- to publish_spotify.wav  48kHz 24-bit stereo  (41.4 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i master.wav -c:a flac Undegradable Bitch- to publish_surround_5.1.flac"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 Undegradable Bitch- to publish_surround_5.1.flac  FLAC 5.1 Lossless  (29.0 MB)"
+            },
+            {
+              "t": "cmd",
+              "m": "$ python write_metadata.py --dialnorm=-31"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2713 metadata embedded"
+            },
+            {
+              "t": "sep",
+              "m": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "ok",
+              "m": "  \ud83c\udf89 PIPELINE COMPLETE \u2014 click \u2b07 EXPORT FILES"
+            }
+          ]
+        },
+        {
+          "stage_num": "08",
+          "name": "Quality Assurance & Evaluation",
+          "description": "Measure final output LUFS \u00b7 True-Peak \u00b7 LRA report",
+          "progress": 100,
+          "status": "done",
+          "logs": [
+            {
+              "t": "info",
+              "m": "  evaluating master: Undegradable Bitch- to publish_spotify.wav"
+            },
+            {
+              "t": "cmd",
+              "m": "$ ffmpeg -i Undegradable Bitch- to publish_spotify.wav -filter_complex ebur128=peak=true -f null -"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2500\u2500\u2500\u2500\u2500\u2500 MASTERING EVALUATION REPORT \u2500\u2500\u2500\u2500\u2500\u2500"
+            },
+            {
+              "t": "warn",
+              "m": "  Integrated LUFS: -70.0 (Target: -10.5, Error: -59.5)"
+            },
+            {
+              "t": "err",
+              "m": "  Max True-Peak:   +0.7 dBTP (Limit: -1.0, Margin: -1.7 dB)"
+            },
+            {
+              "t": "warn",
+              "m": "  Loudness Range:  0.0 LU (Very compressed/squashed)"
+            },
+            {
+              "t": "ok",
+              "m": "  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "a3b95ec7-dfc1-444a-bc4b-c9ad9238e9a7": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\a3b95ec7-dfc1-444a-bc4b-c9ad9238e9a7\\9-to-5 is Dead - to publish.wav",
+    "filename": "9-to-5 is Dead - to publish.wav",
+    "size_mb": 21.408851623535156,
+    "result": {
+      "status": "error",
+      "error": "ffmpeg MP3 export failed: ffmpeg MP3 export failed: ffmpeg version 8.0.1-full_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers\r\n  built with gcc 15.2.0 (Rev8, Built by MSYS2 project)\r\n  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-lcms2 --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-libsnappy --enable-zlib --enable-librist --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-libbluray --enable-libcaca --enable-libdvdnav --enable-libdvdread --enable-sdl2 --enable-libaribb24 --enable-libaribcaption --enable-libdav1d --enable-libdavs2 --enable-libopenjpeg --enable-libquirc --enable-libuavs3d --enable-libxevd --enable-libzvbi --enable-liboapv --enable-libqrencode --enable-librav1e --enable-libsvtav1 --enable-libvvenc --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxavs2 --enable-libxeve --enable-libxvid --enable-libaom --enable-libjxl --enable-libvpx --enable-mediafoundation --enable-libass --enable-frei0r --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-liblensfun --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-libshaderc --enable-vulkan --enable-libplacebo --enable-opencl --enable-libcdio --enable-openal --enable-libgme --enable-libmodplug --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libshine --enable-libtheora --enable-libtwolame --enable-libvo-amrwbenc --enable-libcodec2 --enable-libilbc --enable-libgsm --enable-liblc3 --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-ladspa --enable-libbs2b --enable-libflite --enable-libmysofa --enable-librubberband --enable-libsoxr --enable-chromaprint --enable-whisper\r\n  libavutil      60.  8.100 / 60.  8.100\r\n  libavcodec     62. 11.100 / 62. 11.100\r\n  libavformat    62.  3.100 / 62.  3.100\r\n  libavdevice    62.  1.100 / 62.  1.100\r\n  libavfilter    11.  4.100 / 11.  4.100\r\n  libswscale      9.  1.100 /  9.  1.100\r\n  libswresample   6.  1.100 /  6.  1.100\r\n[aist#0:0/pcm_s16le @ 000001bccc341540] Guessed Channel Layout: 5.1\r\nInput #0, wav, from 'C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\a3b95ec7-dfc1-444a-bc4b-c9ad9238e9a7\\output_51_norm.wav':\r\n  Duration: 00:01:56.92, bitrate: 4233 kb/s\r\n  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 44100 Hz, 5.1, s16, 4233 kb/s\r\n[AVFilterGraph @ 000001bccc95ca80] No option name near 'all'\r\n[AVFilterGraph @ 000001bccc95ca80] Error parsing a filter description around: \r\n[AVFilterGraph @ 000001bccc95ca80] Error parsing filterchain 'pan=stereo|c0=c0+0.707*c2+0.5*c4+0.1*c3|c1=c1+0.707*c2+0.5*c5+0.1*c3,volume=-1dB,limiter=1.0:1.0:1:all' around: \r\nError opening output file C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\a3b95ec7-dfc1-444a-bc4b-c9ad9238e9a7\\9-to-5 is Dead - to publish_youtube.mp3.\r\nError opening output files: Invalid argument\r\n",
+      "stage": 6
+    }
+  },
+  "6da4b2ac-f5bb-4131-84d0-1a1b93fb36ea": {
+    "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\6da4b2ac-f5bb-4131-84d0-1a1b93fb36ea\\Undegradable Bitch- to publish.wav",
+    "filename": "Undegradable Bitch- to publish.wav",
+    "size_mb": 27.605140686035156,
+    "result": {
+      "status": "aborted",
+      "error": "Processing was aborted by user"
+    }
+  },
+  "dffc6aff-fc93-4fff-b706-ed6f7bad9291": {
+    "file_path": "c:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\dffc6aff-fc93-4fff-b706-ed6f7bad9291\\Billionaire Bunkers - extended club mix.wav",
+    "filename": "Billionaire Bunkers - extended club mix.wav",
+    "size_mb": 55.451820373535156,
+    "result": {
+      "status": "aborted",
+      "error": "Processing was aborted by user"
+    }
   }
 }

@@ -257,6 +257,62 @@ class App {
     }
   }
 
+  resetToIdle() {
+    this.sessionId = null;
+    this.filename = null;
+    this.isRunning = false;
+
+    // Reset UI elements
+    const fnameEl = document.getElementById('fn');
+    const dzEl = document.getElementById('dz');
+    const runBtn = document.getElementById('run-btn');
+    const abortBtn = document.getElementById('abort-btn');
+    const cutterBtn = document.getElementById('cutter-toggle-btn');
+    const exportBtn = document.getElementById('export-btn');
+    const archiveBtn = document.getElementById('archive-btn');
+    const downloadDirConfig = document.getElementById('download-dir-config');
+    const sdEl = document.getElementById('sd');
+
+    if (fnameEl) fnameEl.textContent = '';
+    if (dzEl) dzEl.classList.remove('has-file');
+    if (runBtn) {
+      runBtn.disabled = true;
+      runBtn.textContent = '▶ RUN FULL PIPELINE';
+    }
+    if (abortBtn) {
+      abortBtn.style.display = 'none';
+      abortBtn.disabled = false;
+      abortBtn.textContent = '⏹ ABORT PROCESSING';
+    }
+    if (cutterBtn) cutterBtn.style.display = 'none';
+    if (exportBtn) exportBtn.classList.remove('show');
+    if (archiveBtn) archiveBtn.classList.remove('show');
+    if (downloadDirConfig) downloadDirConfig.style.display = 'none';
+    this.downloadDirConfigShown = false;
+
+    // Restore idle state in main panel
+    if (sdEl) {
+      sdEl.innerHTML = `
+        <div class="idle-state" id="idle">
+          <div class="idle-icon">⬡</div>
+          <div class="idle-title">Load a WAV file to begin</div>
+          <div class="idle-sub">
+            Fully automatic — track cutting · stem separation<br>
+            5.1 upmix · pro mastering · encode<br><br>
+            Use <strong style="color:var(--purple)">⚙ Studio Tuning</strong> to dial in the sound.
+          </div>
+        </div>
+      `;
+    }
+
+    // Reset components
+    if (this.pipelineUI) this.pipelineUI.reset();
+    if (this.trackCutter) this.trackCutter.reset();
+    if (this.exportUI) this.exportUI.reset();
+
+    this.log('info', 'Window refreshed. Ready for new song.');
+  }
+
   async runPipeline() {
     if (this.isRunning) return;
 
@@ -274,9 +330,15 @@ class App {
 
     this.isRunning = true;
     const runBtn = document.getElementById('run-btn');
+    const abortBtn = document.getElementById('abort-btn');
+    
     if (runBtn) {
       runBtn.disabled = true;
       runBtn.textContent = '⏳ PROCESSING...';
+    }
+    
+    if (abortBtn) {
+      abortBtn.style.display = 'block';
     }
 
     try {
@@ -308,6 +370,8 @@ class App {
         runBtn.disabled = false;
         runBtn.textContent = '▶ RUN FULL PIPELINE';
       }
+      const abortBtn = document.getElementById('abort-btn');
+      if (abortBtn) abortBtn.style.display = 'none';
     }
   }
 
@@ -315,9 +379,15 @@ class App {
     // Called from track cutter "Apply & Run" button
     this.isRunning = true;
     const runBtn = document.getElementById('run-btn');
+    const abortBtn = document.getElementById('abort-btn');
+    
     if (runBtn) {
       runBtn.disabled = true;
       runBtn.textContent = '⏳ PROCESSING...';
+    }
+
+    if (abortBtn) {
+      abortBtn.style.display = 'block';
     }
 
     try {
@@ -349,6 +419,8 @@ class App {
         runBtn.disabled = false;
         runBtn.textContent = '▶ RUN FULL PIPELINE';
       }
+      const abortBtn = document.getElementById('abort-btn');
+      if (abortBtn) abortBtn.style.display = 'none';
     }
   }
 
@@ -378,10 +450,20 @@ class App {
           clearInterval(pollInterval);
           const failedStage = status.stages && status.stages.find(s => s.status === 'error');
           if (failedStage) {
-            this.log('err', `Pipeline failed at stage ${failedStage.stage_num}: ${failedStage.name}`);
+            const isAborted = failedStage.status === 'aborted' || (failedStage.logs && failedStage.logs.some(l => l.m.includes('aborted')));
+            this.log(isAborted ? 'warn' : 'err', `Pipeline ${isAborted ? 'aborted' : 'failed'} at stage ${failedStage.stage_num}: ${failedStage.name}`);
             this.isRunning = false;
+            
             const runBtn = document.getElementById('run-btn');
             if (runBtn) { runBtn.disabled = false; runBtn.textContent = '▶ RUN FULL PIPELINE'; }
+            
+            const abortBtn = document.getElementById('abort-btn');
+            if (abortBtn) abortBtn.style.display = 'none';
+            
+            // Auto-refresh after a short delay on abort
+            if (isAborted) {
+              setTimeout(() => this.resetToIdle(), 3000);
+            }
           } else {
             this.onPipelineComplete(status);
           }
@@ -395,6 +477,9 @@ class App {
 
   onPipelineComplete(status) {
     this.isRunning = false;
+
+    const abortBtn = document.getElementById('abort-btn');
+    if (abortBtn) abortBtn.style.display = 'none';
 
     // Save last results for the export UI
     if (status.exported_files) {
@@ -543,16 +628,46 @@ class App {
     }
   }
 
-  downloadArchive() {
+  async abortPipeline() {
+    try {
+      this.log('warn', '⏹ Aborting processing...');
+      const response = await this.api.abortPipeline();
+      this.log('info', response.message || 'Abort signal sent.');
+      
+      const abortBtn = document.getElementById('abort-btn');
+      if (abortBtn) {
+        abortBtn.disabled = true;
+        abortBtn.textContent = '⏹ ABORTING...';
+      }
+
+      // The pollProgress will catch the 'aborted' status and call resetToIdle
+    } catch (error) {
+      this.log('err', `Abort failed: ${error.message}`);
+    }
+  }
+
+  async downloadArchive() {
     if (!this.sessionId) return;
-    const url = `${this.api.baseURL}/download-archive/${this.sessionId}`;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `AutoMaster_${this.sessionId.slice(0, 8)}.zip`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    this.log('ok', '🗜 Downloading all files as ZIP archive...');
+    
+    try {
+      this.log('ok', '🗜 Generating and downloading ZIP archive...');
+      
+      // Create custom filename: "Song Name_Master.zip"
+      let baseName = this.filename ? this.filename.replace(/\.[^/.]+$/, "") : `AutoMaster_${this.sessionId.slice(0, 8)}`;
+      let zipName = `${baseName}_Master.zip`;
+      
+      await this.api.downloadArchive(this.sessionId, zipName);
+      
+      this.log('ok', '✓ Archive downloaded successfully.');
+      
+      // Refresh window after successful download
+      setTimeout(() => {
+        this.log('info', 'Refreshing window for next song...');
+        this.resetToIdle();
+      }, 5000);
+    } catch (e) {
+      this.log('err', `Archive download failed: ${e.message}`);
+    }
   }
 }
 

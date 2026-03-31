@@ -182,6 +182,11 @@ export class PipelineUI {
     this.buildSidebar();
   }
 
+  reset() {
+    this.currentStageIndex = 0;
+    this.buildSidebar();
+  }
+
   buildSidebar() {
     const sl = document.getElementById('sl');
     if (!sl) return;
@@ -394,6 +399,7 @@ export class PipelineUI {
         <div class="done-icon">✓</div>
         <div class="done-title">Pipeline Complete</div>
         <div class="done-sub">All stages finished · Click <strong style="color:var(--teal)">⬇ EXPORT FILES</strong> to choose destination formats</div>
+        <button onclick="window.app.resetToIdle()" style="margin-top:15px;padding:6px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--text2);font-family:var(--mono);font-size:10px;cursor:pointer">↺ START NEW PROJECT</button>
       </div>
     `;
   }

@@ -1,0 +1,51 @@
+commit 62dbc30bda0176f7ca7f980f9ff5eb90af73ea57
+Author: Generation Null <smmgo@generationnull.com>
+Date:   Tue Mar 24 19:31:45 2026 +0200
+
+    Fix RnB bass ducking bug by fixing LFE crossover and compressor sidechain HPF
+
+diff --git a/core/pipeline/stage_04_upmix.py b/core/pipeline/stage_04_upmix.py
+index 4b6f7ae..113e299 100644
+--- a/core/pipeline/stage_04_upmix.py
++++ b/core/pipeline/stage_04_upmix.py
+@@ -88,8 +88,9 @@ class Stage04Upmix(PipelineStage):
+             bass_lfe = self._lowpass(bass_mono, lfe_crossover, sr)
+             channels["LFE"][:len(bass_lfe)] = bass_lfe * bass_gain
+             # Residual to L/R
+-            channels["L"][:len(bass_mono)] += bass_mono * lr_residual
+-            channels["R"][:len(bass_mono)] += bass_mono * lr_residual
++            bass_residual = self._highpass(bass_mono, lfe_crossover, sr)
++            channels["L"][:len(bass_residual)] += bass_residual * lr_residual
++            channels["R"][:len(bass_residual)] += bass_residual * lr_residual
+             self.log("info", f"  bass   → LFE ({lfe_crossover:.0f} Hz LP) gain {bass_gain:.2f}x, L/R residual {lr_residual:.2f}x")
+         
+         # Drums → L/R wide + Ls/Rs ambience
+@@ -158,6 +159,13 @@ class Stage04Upmix(PipelineStage):
+         b, a = butter(order, normalized_cutoff, btype='low')
+         return lfilter(b, a, data)
+ 
++    def _highpass(self, data: np.ndarray, cutoff: float, sr: int, order: int = 4):
++        """Apply high-pass Butterworth filter"""
++        nyquist = sr / 2
++        normalized_cutoff = cutoff / nyquist
++        b, a = butter(order, normalized_cutoff, btype='high')
++        return lfilter(b, a, data)
++
+     async def _render_51(self, channels: Dict[str, np.ndarray], output_path: Path, sr: int):
+         """Render channels to 6-channel interleaved WAV"""
+         # ITU-R BS.775 channel order: L, R, C, LFE, Ls, Rs
+diff --git a/core/pipeline/stage_05_studio_chain.py b/core/pipeline/stage_05_studio_chain.py
+index a6afa78..fc0a6a2 100644
+--- a/core/pipeline/stage_05_studio_chain.py
++++ b/core/pipeline/stage_05_studio_chain.py
+@@ -70,8 +70,8 @@ class Stage05StudioChain(PipelineStage):
+         for ch in range(6):
+             if ch == 3:  # Skip LFE from bus compression
+                 continue
+-            data[:, ch] = self._compress(data[:, ch], ratio, attack, release, sr, sidechain_hp=100)
+-        self.log("info", "  [COMP] LFE bypassed, sidechain HP 100 Hz")
++            data[:, ch] = self._compress(data[:, ch], ratio, attack, release, sr, sidechain_hp=150)
++        self.log("info", "  [COMP] LFE bypassed, sidechain HP 150 Hz")
+         await asyncio.sleep(0.01)
+         
+         # Genre specific advanced processing

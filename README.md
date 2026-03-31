@@ -158,8 +158,10 @@ Files are organized by playback destination:
 | `POST` | `/api/studio-config` | Set studio tuning |
 | `POST` | `/api/studio-preset/{name}` | Apply studio preset |
 | `POST` | `/api/run` | Start pipeline |
+| `POST` | `/api/abort` | Abort running pipeline |
 | `GET` | `/api/export/{session_id}` | Get exported files |
 | `GET` | `/api/download/{session_id}/{filename}` | Download file |
+| `GET` | `/api/download-archive/{session_id}` | Download ZIP archive |
 
 ---
 
@@ -220,8 +222,12 @@ Following **DOGE Mode** standards:
 
 ## Changelog
 
-- **Added Spotify Genre Presets**: Pop, Hip-Hop, R&B, and Rock configurations strictly targeting Spotify's streaming LUFS/TP standards with genre-specific mastering chain settings (multi-band compression, tailored EQ, hard clipping).
-- **FLAC Lossless Output Support**: FLAC 5.1 export option is natively supported in the UI, which intentionally bypasses Spotify's aggressive loudness targeting rules in Stage 06 to preserve full dynamic range.
+- **Added "Abort Processing" Button**: Implemented a backend-cancellable `asyncio` task and a red UI button to safely stop long-running stem separation mid-process.
+- **Improved "Export All" ZIP Logic**: Refactored the archive download to use blob-based fetching and dynamic naming (`{song_name}_Master.zip`).
+- **Critical DSP Fixes**: Resolved bass pumping (bus comp sidechain HPF @ 150Hz), removed de-esser "robotic" distortion, and fixed phase cancellation in shelving EQs.
+- **Retuned Hip-Hop Presets**: Adjusted `hiphop` and `spotify_hiphop` to reduce aggressive ducking and soften harsh clap transients.
+- **Added Spotify Genre Presets**: Pop, Hip-Hop, R&B, and Rock configurations targeting Spotify LUFS/TP standards.
+- **FLAC Lossless Output Support**: Native 5.1 FLAC export with dynamic range preservation.
 
 ---
 
@@ -241,5 +247,5 @@ Built with:
 
 ---
 
-**Last Updated**: March 20, 2026  
-**Version**: 1.0.0
+**Last Updated**: March 24, 2026  
+**Version**: 1.1.0

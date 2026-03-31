@@ -110,6 +110,10 @@ export class API {
     });
   }
 
+  async abortPipeline() {
+    return this.request('/abort', { method: 'POST' });
+  }
+
   // Export
   async getExportFiles(sessionId) {
     return this.request(`/export/${sessionId}`);
@@ -131,6 +135,28 @@ export class API {
     const a = document.createElement('a');
     a.href = downloadUrl;
     a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(downloadUrl);
+  }
+
+  async downloadArchive(sessionId, suggestedFilename) {
+    const url = `${this.baseURL}/download-archive/${sessionId}`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Archive download failed');
+      throw new Error(`Archive download failed: ${response.status} - ${errorText}`);
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = suggestedFilename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

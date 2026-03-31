@@ -43,10 +43,10 @@ class Stage05StudioChain(PipelineStage):
 
         self.log("info", f"  processing 6 channels @ {sr}Hz")
 
-        # HPF all channels @ 20 Hz
-        self.log("info", "  [ALL] HPF 20 Hz Butterworth 4th")
+        # HPF all channels @ 30 Hz
+        self.log("info", "  [ALL] HPF 30 Hz Butterworth 4th")
         for ch in range(6):
-            data[:, ch] = self._highpass(data[:, ch], 20, sr)
+            data[:, ch] = self._highpass(data[:, ch], 30, sr)
         await asyncio.sleep(0.01)
 
         # Console emulation (harmonic saturation)
@@ -67,10 +67,11 @@ class Stage05StudioChain(PipelineStage):
         release = config.get("comp_release", 0.1)
         self.log("info", f"  [COMP] {ratio:.1f}:1 attack {attack*1000:.0f}ms release {release*1000:.0f}ms")
         
+        loop = asyncio.get_running_loop()
         for ch in range(6):
             if ch == 3:  # Skip LFE from bus compression
                 continue
-            data[:, ch] = self._compress(data[:, ch], ratio, attack, release, sr, sidechain_hp=150)
+            data[:, ch] = await loop.run_in_executor(None, self._compress, data[:, ch], ratio, attack, release, sr, 150)
         self.log("info", "  [COMP] LFE bypassed, sidechain HP 150 Hz")
         await asyncio.sleep(0.01)
         
@@ -91,28 +92,26 @@ class Stage05StudioChain(PipelineStage):
                 if ch < 3: # L, R, C
                     data[:, ch] = self._peak_notch(data[:, ch], 3500, sr, 2.0, 1.0)
 
-        # EQ tonal shape
+        # EQ tonal shape — air shelf applied BEFORE saturation so harmonics don't get re-boosted
         low = config.get("low", 3)
         air = config.get("air", 4)
         mid = config.get("mid", -2)
-        
-        self.log("info", f"  [EQ] shelf +{low} dB @ 60 Hz  |  air +{air} dB @ 14 kHz")
-        self.log("info", f"  [EQ] mids {mid:+d} dB @ 400 Hz scoop")
-        
+
+        self.log("info", f"  [EQ] shelf +{low} dB @ 60 Hz  |  air +{air} dB @ 14 kHz  |  mids {mid:+d} dB @ 400 Hz")
+
         for ch in range(6):
             # Low shelf boost
             data[:, ch] = self._low_shelf(data[:, ch], 60, sr, low)
             # Mid cut
             data[:, ch] = self._peak_notch(data[:, ch], 400, sr, mid, 2)
-            # Air shelf
+            # Air shelf — before saturation so HF harmonics are not re-amplified
             if ch < 5:  # Not LFE
                 data[:, ch] = self._high_shelf(data[:, ch], 14000, sr, air)
-        await asyncio.sleep(0.01)
 
-        # De-esser on center channel
+        # De-esser on center channel — applied after EQ, before saturation
         self.log("info", "  [C] de-esser gr_max −3.8 dB")
         data[:, 2] = self._deess(data[:, 2], 6000, sr)
-        
+
         # Rear shelf −4 dB @ 12 kHz
         self.log("info", "  [Ls/Rs] shelf −4 dB @ 12 kHz")
         for ch in [4, 5]:  # Ls, Rs
@@ -149,25 +148,24 @@ class Stage05StudioChain(PipelineStage):
             data[:, 1] = mid - side * width_factor
             self.log("info", f"  [WIDTH] stereo width {width_val}% ({'wider' if width_val > 100 else 'narrower'})")
 
-        # Genre specific transient / master clipping
-        if config.get("tape_saturate_loudness"):
-            self.log("info", "  [COLOR] tube/tape saturation for loudness")
+        # Optional single light saturation pass — capped at 0.4 to avoid distortion stacking
+        # (tape_saturate_loudness and tape_drive_master collapsed into one safe pass)
+        extra_sat = config.get("tape_saturate_loudness") or config.get("tape_drive_master")
+        if extra_sat:
+            self.log("info", "  [COLOR] light extra saturation pass (capped 0.4)")
             for ch in range(6):
-                data[:, ch] = self._tape_saturation(data[:, ch], 0.6)
-                
-        if config.get("tape_drive_master"):
-            self.log("info", "  [COLOR] drive master into tape to shave spiky transients")
-            for ch in range(6):
-                data[:, ch] = self._tape_saturation(data[:, ch], 0.8)
-                
+                data[:, ch] = self._tape_saturation(data[:, ch], 0.4)
+
         if config.get("hard_clip_drums"):
             self.log("info", "  [DYN] hard clip transients before final limiting")
             data = np.clip(data, -0.85, 0.85)
 
-        # Normalize to prevent clipping
+        # Force a -3dB peak ceiling before final stage
+        self.log("info", "  [DYN] forced -3dB peak ceiling before final stage")
         max_val = np.max(np.abs(data))
-        if max_val > 0.95:
-            data /= max_val * 1.05
+        target_peak = 10 ** (-3.0 / 20)
+        if max_val > target_peak:
+            data *= target_peak / max_val
 
         # Write processed output
         output_path = input_path.parent / "output_51_eq.wav"
@@ -220,7 +218,7 @@ class Stage05StudioChain(PipelineStage):
                 smoothed[i] = release_coef * smoothed[i-1] + (1 - release_coef) * envelope[i]
         
         # Gain reduction
-        threshold = 0.3
+        threshold = 0.5  # -6 dBFS — only catches peaks, not program material
         gain_reduction = np.ones_like(data)
         above_threshold = smoothed > threshold
         
@@ -238,13 +236,13 @@ class Stage05StudioChain(PipelineStage):
         dt = 1 / sr
         
         # Apply gain to low frequencies
-        filtered = self._lowpass(data, freq, sr, 2)
+        filtered = self._lowpass(data, freq, sr, 1)
         return data + filtered * (gain_linear - 1)
 
     def _high_shelf(self, data: np.ndarray, freq: float, sr: int, gain_db: float):
         """High shelf EQ"""
         gain_linear = 10 ** (gain_db / 20)
-        filtered = self._highpass(data, freq, sr, 2)
+        filtered = self._highpass(data, freq, sr, 1)
         return data + filtered * (gain_linear - 1)
 
     def _peak_notch(self, data: np.ndarray, freq: float, sr: int, gain_db: float, q: float):
@@ -271,13 +269,19 @@ class Stage05StudioChain(PipelineStage):
         high = self._highpass(data, freq, sr, 2)
         envelope = np.abs(high)
         
+        # Smooth the envelope — 300 Hz gives ~3 ms time constant, natural sibilance control
+        nyquist = sr / 2
+        b, a = butter(1, 300 / nyquist, btype='low')
+        smoothed = lfilter(b, a, envelope)
+        
         # Compress when sibilance detected
         threshold = 0.1
         gain = np.ones_like(data)
-        above = envelope > threshold
+        above = smoothed > threshold
         
         if np.any(above):
-            gain[above] = threshold / (envelope[above] + 0.001)
-            gain[above] = np.clip(gain[above], 0.3, 1.0)
+            # Limit maximum gain reduction to -3.8 dB (approx 0.64)
+            gain[above] = threshold / (smoothed[above] + 0.001)
+            gain[above] = np.clip(gain[above], 0.64, 1.0)
         
         return data * gain

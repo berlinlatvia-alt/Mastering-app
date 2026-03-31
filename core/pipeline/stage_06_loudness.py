@@ -66,6 +66,14 @@ class Stage06Loudness(PipelineStage):
         integrated_lufs = self._calculate_integrated_lufs(data, channel_measurements)
         makeup_gain = target_lufs - integrated_lufs
 
+        # Limiter Behavior Rule: Max 4dB Gain Reduction
+        input_peak_db = 20 * np.log10(np.max(np.abs(data)) + 1e-10)
+        peak_overshoot = (input_peak_db + makeup_gain) - tp_limit_db
+        if peak_overshoot > 4.0:
+            gain_drop = peak_overshoot - 4.0
+            makeup_gain -= gain_drop
+            self.log("info", f"  [LIMITER] overshoot {peak_overshoot:.1f}dB exceeds 4dB. Dropping input gain by {gain_drop:.1f}dB")
+
         self.log("info", f"  integrated loudness: {integrated_lufs:.1f} LUFS")
         self.log("info", f"  applying makeup: {makeup_gain:+.1f} dB → {target_lufs:.1f} LUFS target")
         
@@ -89,6 +97,18 @@ class Stage06Loudness(PipelineStage):
         self.status = "done"
         self.set_progress(100)
         return output_path
+
+    @staticmethod
+    def _smooth_limiter_gain(n_samples, ahead_env, tp_linear, attack_coef, release_coef):
+        """Compute smoothed gain curve for look-ahead limiter (runs in thread executor)"""
+        gain_needed = np.where(ahead_env > tp_linear, tp_linear / (ahead_env + 1e-10), 1.0)
+        smoothed_gain = np.ones(n_samples)
+        for i in range(1, n_samples):
+            if gain_needed[i] < smoothed_gain[i - 1]:
+                smoothed_gain[i] = attack_coef * smoothed_gain[i - 1] + (1 - attack_coef) * gain_needed[i]
+            else:
+                smoothed_gain[i] = release_coef * smoothed_gain[i - 1] + (1 - release_coef) * gain_needed[i]
+        return smoothed_gain
 
     async def _measure_loudness(self, data: np.ndarray, sr: int) -> Dict[str, Dict[str, float]]:
         """Measure loudness per channel using K-weighting (EBU R128)"""
@@ -166,19 +186,42 @@ class Stage06Loudness(PipelineStage):
         return -70
 
     async def _normalize(self, data: np.ndarray, output_path: Path, sr: int, gain_db: float, tp_limit_db: float = -1.0):
-        """Apply loudness normalization"""
-        # Convert dB to linear gain
+        """Apply loudness normalization with look-ahead true-peak limiter"""
         gain_linear = 10 ** (gain_db / 20)
-        
-        # Apply gain
         normalized = data * gain_linear
-        
-        # True-peak limiting
-        max_tp = np.max(np.abs(normalized))
+
         tp_linear = 10 ** (tp_limit_db / 20)
-        
+        max_tp = np.max(np.abs(normalized))
+
         if max_tp > tp_linear:
-            normalized *= tp_linear / max_tp
-        
-        # Write output
+            n_samples, n_channels = normalized.shape
+
+            # Look-ahead: read peak envelope 5ms ahead so gain reduction starts
+            # before the peak arrives, avoiding the transient clipping that tanh caused
+            lookahead = int(0.005 * sr)
+            attack_coef = np.exp(-1 / (0.001 * sr))   # 1 ms attack
+            release_coef = np.exp(-1 / (0.100 * sr))  # 100 ms release
+
+            # Per-sample peak across all channels
+            peak_env = np.max(np.abs(normalized), axis=1)
+
+            # Shift envelope forward by lookahead samples
+            ahead_env = np.empty(n_samples)
+            ahead_env[:n_samples - lookahead] = peak_env[lookahead:]
+            ahead_env[n_samples - lookahead:] = peak_env[-1]
+
+            # Run the sample-by-sample gain smoothing in a thread so the
+            # event loop stays free and abort signals can land immediately
+            smoothed_gain = await asyncio.get_running_loop().run_in_executor(
+                None, self._smooth_limiter_gain,
+                n_samples, ahead_env, tp_linear, attack_coef, release_coef
+            )
+
+            # Apply time-varying gain to all channels
+            for ch in range(n_channels):
+                normalized[:, ch] *= smoothed_gain
+
+            # Hard safety clip for any remaining inter-sample peaks
+            normalized = np.clip(normalized, -tp_linear, tp_linear)
+
         sf.write(str(output_path), normalized, sr)

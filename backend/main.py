@@ -76,6 +76,7 @@ async def no_cache_middleware(request: Request, call_next):
 # Global pipeline instance
 pipeline = PipelineManager()
 active_sessions: Dict[str, Dict] = {}
+active_pipeline_task: Optional[asyncio.Task] = None
 
 # Persistent session storage
 SESSIONS_FILE = Path("sessions.json")
@@ -303,8 +304,10 @@ async def apply_studio_preset(preset_name: str):
 
 
 @app.post("/api/run")
-async def run_pipeline(background_tasks: BackgroundTasks):
+async def run_pipeline():
     """Start the pipeline processing"""
+    global active_pipeline_task
+    
     if pipeline.is_running:
         raise HTTPException(status_code=400, detail="Pipeline already running")
 
@@ -323,29 +326,54 @@ async def run_pipeline(background_tasks: BackgroundTasks):
 
     logger.info(f"Starting pipeline for session: {session_id}")
 
-    # Run pipeline in background
+    # Run pipeline as an explicit task that can be cancelled
     async def run():
         try:
             result = await pipeline.run(input_path, output_dir)
             session["result"] = result
-            # Convert Path to string for JSON serialization
             if 'output_dir' in result:
                 result['output_dir'] = str(result['output_dir'])
-            # Persist session with results to disk
             save_sessions()
-            logger.info(f"Pipeline complete for session {session_id}, sessions saved")
+            logger.info(f"Pipeline complete for session {session_id}")
+        except asyncio.CancelledError:
+            logger.info(f"Pipeline task was cancelled for session {session_id}")
+            # Ensure pipeline state is reset
+            pipeline.is_running = False
+            session["result"] = {"status": "aborted", "error": "Processing was aborted by user"}
+            save_sessions()
         except Exception as e:
             logger.error(f"Pipeline failed for session {session_id}: {e}")
             session["result"] = {"status": "error", "error": str(e)}
             save_sessions()
 
-    background_tasks.add_task(run)
+    active_pipeline_task = asyncio.create_task(run())
 
     return {
         "status": "started",
         "session_id": session_id,
         "message": "Pipeline started",
     }
+
+
+@app.post("/api/abort")
+async def abort_pipeline():
+    """Abort the currently running pipeline"""
+    global active_pipeline_task
+    
+    if not pipeline.is_running:
+        return {"status": "not_running", "message": "No pipeline is currently running"}
+    
+    logger.info("Abort request received via API")
+    
+    # 1. Signal the pipeline manager (for clean breaks between stages)
+    pipeline.abort()
+    
+    # 2. Cancel the background task (to interrupt async blocks)
+    if active_pipeline_task and not active_pipeline_task.done():
+        active_pipeline_task.cancel()
+        logger.info("Active pipeline task cancelled")
+    
+    return {"status": "aborted", "message": "Pipeline is being aborted"}
 
 
 @app.get("/api/export/{session_id}")
@@ -408,7 +436,12 @@ async def download_archive(session_id: str):
         # Build zip next to output files (avoids temp dir permission issues)
         output_dir = CURRENT_OUTPUT_DIR / session_id
         output_dir.mkdir(parents=True, exist_ok=True)
-        zip_path = output_dir / f"AutoMaster_{session_id[:8]}.zip"
+        
+        # Get original filename without extension for zip name
+        original_filename = session.get("filename", f"AutoMaster_{session_id[:8]}")
+        base_name = Path(original_filename).stem
+        zip_name = f"{base_name}_Master.zip"
+        zip_path = output_dir / zip_name
 
         with zipfile.ZipFile(str(zip_path), "w", zipfile.ZIP_DEFLATED) as zf:
             for f in exported_files:

@@ -16,6 +16,7 @@ from .stage_04_upmix import Stage04Upmix
 from .stage_05_studio_chain import Stage05StudioChain
 from .stage_06_loudness import Stage06Loudness
 from .stage_07_encode import Stage07Encode
+from .stage_08_evaluate import Stage08Evaluate
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ class PipelineManager:
             Stage05StudioChain(),
             Stage06Loudness(),
             Stage07Encode(),
+            Stage08Evaluate(),
         ]
         self.context: Dict[str, Any] = {}
         self.current_stage = 0
@@ -66,6 +68,7 @@ class PipelineManager:
             stage.logs = []
         self.context["output_dir"] = output_dir
         self.context["input_path"] = input_path
+        self.context["abort_requested"] = False
 
         logger.info(f"Starting pipeline with input: {input_path}")
 
@@ -73,6 +76,10 @@ class PipelineManager:
             current_path = input_path
 
             for i, stage in enumerate(self.stages):
+                if self.context.get("abort_requested"):
+                    logger.info("Pipeline abort requested between stages")
+                    raise asyncio.CancelledError("Pipeline aborted by user")
+
                 self.current_stage = i
                 logger.info(f"Executing stage {stage.stage_num}: {stage.name}")
 
@@ -113,7 +120,14 @@ class PipelineManager:
             "stages": [s.to_dict() for s in self.stages],
             "context_keys": list(self.context.keys()),
             "exported_files": self.context.get("exported_files", []),
+            "abort_requested": self.context.get("abort_requested", False),
         }
+
+    def abort(self):
+        """Request pipeline abortion"""
+        if self.is_running:
+            self.context["abort_requested"] = True
+            logger.info("Pipeline abort requested")
 
     def reset(self):
         """Reset pipeline state"""

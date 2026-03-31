@@ -1,0 +1,443 @@
+﻿>   "be1cfdb7-28a7-44d5-b9a0-fc6e0b9ac149": {
+>     "file_path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\uploads\\be1cfdb7-28a7-44d5-b9a0-fc6e0b9ac149\\Undegradable Bitch- to publish.wav",
+      "filename": "Undegradable Bitch- to publish.wav",
+      "size_mb": 27.605140686035156,
+      "result": {
+        "status": "complete",
+>       "output_dir": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\be1cfdb7-28a7-44d5-b9a0-fc6e0b9ac149",
+        "exported_files": [
+          {
+>           "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\be1cfdb7-28a7-44d5-b9a0-fc6e0b9ac149\\Undegradable Bitch- to publish_youtube.mp3",
+            "filename": "Undegradable Bitch- to publish_youtube.mp3",
+            "format": "MP3 320k",
+            "size_mb": 5.8,
+            "label": "YouTube Ready"
+          },
+          {
+>           "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\be1cfdb7-28a7-44d5-b9a0-fc6e0b9ac149\\Undegradable Bitch- to publish_spotify.wav",
+            "filename": "Undegradable Bitch- to publish_spotify.wav",
+            "format": "WAV 24-bit",
+            "size_mb": 41.4,
+            "label": "Spotify Master"
+          },
+          {
+>           "path": "C:\\Users\\smmgo\\Documents\\Generation Null\\Mastering app\\output\\be1cfdb7-28a7-44d5-b9a0-fc6e0b9ac149\\Undegradable Bitch- to publish_surround_5.1.flac",
+            "filename": "Undegradable Bitch- to publish_surround_5.1.flac",
+            "format": "FLAC 5.1",
+            "size_mb": 29.0,
+            "label": "Pro 5.1 Surround"
+          }
+        ],
+        "stages": [
+          {
+            "stage_num": "01",
+            "name": "Input Preparation & Analysis",
+            "description": "Resample \u00b7 normalize \u00b7 spectral scan \u00b7 true-peak detection",
+            "progress": 100,
+            "status": "done",
+            "logs": [
+              {
+                "t": "cmd",
+                "m": "$ ffprobe -v quiet -print_format json -show_streams Undegradable Bitch- to publish.wav"
+              },
+              {
+                "t": "info",
+                "m": "  sample_rate: 48000 | bit_depth: 16 | channels: 2 | duration: 2m30s"
+              },
+              {
+                "t": "cmd",
+                "m": "$ ffmpeg -i Undegradable Bitch- to publish.wav -vn -ar 48000 -sample_fmt s16 -ac 2 Undegradable Bitch- to publish_48k.wav"
+              },
+              {
+                "t": "ok",
+                "m": "  \u2713 resample complete  44100\u219248000 Hz"
+              },
+              {
+                "t": "cmd",
+                "m": "$ python analyze.py --true-peak --lufs"
+              },
+              {
+                "t": "info",
+                "m": "  integrated: -16.2 LUFS  |  true-peak: -2.4 dBTP"
+              },
+              {
+                "t": "info",
+                "m": "  stereo width: 0.04  |  LR correlation: 0.96"
+              },
+              {
+                "t": "ok",
+                "m": "  \u2713 analysis complete"
+              }
+            ]
+          },
+          {
+            "stage_num": "02",
+            "name": "Track Cutting",
+            "description": "Manual cut points or silence detection",
+            "progress": 100,
+            "status": "done",
+            "logs": [
+              {
+                "t": "info",
+                "m": "  \u2298 Track cutting skipped \u2014 using full audio"
+              }
+            ]
+          },
+          {
+            "stage_num": "03",
+            "name": "Stem Separation",
+            "description": "Demucs v4 \u00b7 6 stems",
+            "progress": 100,
+            "status": "done",
+            "logs": [
+              {
+                "t": "cmd",
+                "m": "$ demucs --model htdemucs_6s Undegradable Bitch- to publish_48k.wav"
+              },
+              {
+                "t": "info",
+                "m": "  device: cpu"
+              },
+              {
+                "t": "info",
+                "m": "  loading model: htdemucs_6s"
+              },
+              {
+                "t": "info",
+                "m": "  loading audio..."
+              },
+              {
+                "t": "info",
+                "m": "  separating stems..."
+              },
+              {
+                "t": "info",
+                "m": "  drums.wav    exported"
+              },
+              {
+                "t": "info",
+                "m": "  bass.wav     exported"
+              },
+              {
+                "t": "info",
+                "m": "  other.wav    exported"
+              },
+              {
+                "t": "info",
+                "m": "  vocals.wav   exported"
+              },
+              {
+                "t": "info",
+                "m": "  guitar.wav   exported"
+              },
+              {
+                "t": "info",
+                "m": "  piano.wav    exported"
+              },
+              {
+                "t": "ok",
+                "m": "  \u2713 6 stems separated"
+              }
+            ]
+          },
+          {
+            "stage_num": "04",
+            "name": "5.1 Channel Assignment & Spatial Upmix",
+            "description": "Stem routing \u00b7 pan law \u00b7 LFE crossover",
+            "progress": 100,
+            "status": "done",
+            "logs": [
+              {
+                "t": "cmd",
+                "m": "$ python upmix_51.py --stems stems/ --law itu775"
+              },
+              {
+                "t": "info",
+                "m": "  loaded vocals.wav"
+              },
+              {
+                "t": "info",
+                "m": "  loaded drums.wav"
+              },
+              {
+                "t": "info",
+                "m": "  loaded bass.wav"
+              },
+              {
+                "t": "info",
+                "m": "  loaded guitar.wav"
+              },
+              {
+                "t": "info",
+                "m": "  loaded piano.wav"
+              },
+              {
+                "t": "info",
+                "m": "  loaded other.wav"
+              },
+              {
+                "t": "info",
+                "m": "  routing stems to channels..."
+              },
+              {
+                "t": "info",
+                "m": "  vocals \u2192 C (mono, \u22121.5 dB)"
+              },
+              {
+                "t": "info",
+                "m": "  bass   \u2192 LFE (111 Hz LP) gain 1.48x, L/R residual 0.31x"
+              },
+              {
+                "t": "info",
+                "m": "  drums  \u2192 L/R wide + Ls/Rs \u22126 dB"
+              },
+              {
+                "t": "info",
+                "m": "  guitar \u2192 L/R stereo"
+              },
+              {
+                "t": "info",
+                "m": "  piano \u2192 L/R stereo"
+              },
+              {
+                "t": "info",
+                "m": "  other  \u2192 Ls/Rs HF cut"
+              },
+              {
+                "t": "info",
+                "m": "  phase coherence check..."
+              },
+              {
+                "t": "info",
+                "m": "  phase L\u2194R: 1.00 \u26a0  L\u2194Ls: 0.96 \u2713"
+              },
+              {
+                "t": "ok",
+                "m": "  \u2713 5.1 upmix \u2192 output_51_raw.wav (6ch)"
+              }
+            ]
+          },
+          {
+            "stage_num": "05",
+            "name": "Pro Studio EQ, Dynamics & Color",
+            "description": "Console emulation \u00b7 tape \u00b7 bus comp \u00b7 exciter",
+            "progress": 100,
+            "status": "done",
+            "logs": [
+              {
+                "t": "cmd",
+                "m": "$ python studio_chain.py --preset spotify_rb --console ssl --tape 45 --comp 25"
+              },
+              {
+                "t": "info",
+                "m": "  processing 6 channels @ 44100Hz"
+              },
+              {
+                "t": "info",
+                "m": "  [ALL] HPF 30 Hz Butterworth 4th"
+              },
+              {
+                "t": "info",
+                "m": "  [COLOR] SSL 4000 G console model loaded"
+              },
+              {
+                "t": "info",
+                "m": "  [COLOR] tape sat 45%  2nd: +1.8 dB  3rd: +0.4 dB"
+              },
+              {
+                "t": "info",
+                "m": "  [COMP] 2.0:1 attack 10ms release 100ms"
+              },
+              {
+                "t": "info",
+                "m": "  [COMP] LFE bypassed, sidechain HP 150 Hz"
+              },
+              {
+                "t": "info",
+                "m": "  [EQ] cut harsh 3-4kHz range"
+              },
+              {
+                "t": "info",
+                "m": "  [EQ] shelf +4 dB @ 60 Hz  |  air +3 dB @ 14 kHz  |  mids +0 dB @ 400 Hz"
+              },
+              {
+                "t": "info",
+                "m": "  [C] de-esser gr_max \u22123.8 dB"
+              },
+              {
+                "t": "info",
+                "m": "  [Ls/Rs] shelf \u22124 dB @ 12 kHz"
+              },
+              {
+                "t": "info",
+                "m": "  [VERB] surround reverb 40% (Ls/Rs 12%, L/R 6%)"
+              },
+              {
+                "t": "info",
+                "m": "  [WIDTH] stereo width 110% (wider)"
+              },
+              {
+                "t": "info",
+                "m": "  [COLOR] light extra saturation pass (capped 0.4)"
+              },
+              {
+                "t": "info",
+                "m": "  [DYN] forced -3dB peak ceiling before final stage"
+              },
+              {
+                "t": "ok",
+                "m": "  \u2713 studio processing complete"
+              }
+            ]
+          },
+          {
+            "stage_num": "06",
+            "name": "Loudness Normalization (EBU R128)",
+            "description": "Integrated LUFS \u00b7 true-peak \u00b7 LRA",
+            "progress": 100,
+            "status": "done",
+            "logs": [
+              {
+                "t": "cmd",
+                "m": "$ ffmpeg -i output_51_eq.wav -af ebur128=framelog=verbose -f null -"
+              },
+              {
+                "t": "info",
+                "m": "  measuring loudness per channel..."
+              },
+              {
+                "t": "info",
+                "m": "  [L  ]    -25.4 LUFS  TP: -4.5 dBTP"
+              },
+              {
+                "t": "info",
+                "m": "  [R  ]    -25.4 LUFS  TP: -4.5 dBTP"
+              },
+              {
+                "t": "info",
+                "m": "  [C  ]    -23.2 LUFS  TP: -5.5 dBTP"
+              },
+              {
+                "t": "info",
+                "m": "  [LFE]    -25.9 LUFS  TP: -3.0 dBTP"
+              },
+              {
+                "t": "info",
+                "m": "  [Ls ]    -31.9 LUFS  TP: -9.8 dBTP"
+              },
+              {
+                "t": "info",
+                "m": "  [Rs ]    -32.0 LUFS  TP: -9.8 dBTP"
+              },
+              {
+                "t": "info",
+                "m": "  [LIMITER] overshoot 6.3dB exceeds 4dB. Dropping input gain by 2.3dB"
+              },
+              {
+                "t": "info",
+                "m": "  integrated loudness: -18.8 LUFS"
+              },
+              {
+                "t": "info",
+                "m": "  applying makeup: +6.0 dB \u2192 -10.5 LUFS target"
+              },
+              {
+                "t": "ok",
+                "m": "  \u2713 final: -10.5 LUFS  TP: -1.0 dBTP \u2713"
+              }
+            ]
+          },
+          {
+            "stage_num": "07",
+            "name": "Encode & Export",
+            "description": "6-ch WAV \u00b7 AC-3 \u00b7 DTS \u00b7 metadata embed",
+            "progress": 100,
+            "status": "done",
+            "logs": [
+              {
+                "t": "info",
+                "m": "  Mode: BASIC \u2014 generating 3 files"
+              },
+              {
+                "t": "cmd",
+                "m": "$ ffmpeg -i master.wav -c:a libmp3lame -b:a 320k -ar 48000 Undegradable Bitch- to publish_youtube.mp3"
+              },
+              {
+                "t": "ok",
+                "m": "  \u2713 Undegradable Bitch- to publish_youtube.mp3  320 kbps stereo  (5.8 MB)"
+              },
+              {
+                "t": "cmd",
+                "m": "$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 Undegradable Bitch- to publish_spotify.wav"
+              },
+              {
+                "t": "ok",
+                "m": "  \u2713 Undegradable Bitch- to publish_spotify.wav  48kHz 24-bit stereo  (41.4 MB)"
+              },
+              {
+                "t": "cmd",
+                "m": "$ ffmpeg -i master.wav -c:a flac Undegradable Bitch- to publish_surround_5.1.flac"
+              },
+              {
+                "t": "ok",
+                "m": "  \u2713 Undegradable Bitch- to publish_surround_5.1.flac  FLAC 5.1 Lossless  (29.0 MB)"
+              },
+              {
+                "t": "cmd",
+                "m": "$ python write_metadata.py --dialnorm=-31"
+              },
+              {
+                "t": "ok",
+                "m": "  \u2713 metadata embedded"
+              },
+              {
+                "t": "sep",
+                "m": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+              },
+              {
+                "t": "ok",
+                "m": "  \ud83c\udf89 PIPELINE COMPLETE \u2014 click \u2b07 EXPORT FILES"
+              }
+            ]
+          },
+          {
+            "stage_num": "08",
+            "name": "Quality Assurance & Evaluation",
+            "description": "Measure final output LUFS \u00b7 True-Peak \u00b7 LRA report",
+            "progress": 100,
+            "status": "done",
+            "logs": [
+              {
+                "t": "info",
+                "m": "  evaluating master: Undegradable Bitch- to publish_spotify.wav"
+              },
+              {
+                "t": "cmd",
+                "m": "$ ffmpeg -i Undegradable Bitch- to publish_spotify.wav -filter_complex ebur128=peak=true -f null -"
+              },
+              {
+                "t": "ok",
+                "m": "  \u2500\u2500\u2500\u2500\u2500\u2500 MASTERING EVALUATION REPORT \u2500\u2500\u2500\u2500\u2500\u2500"
+              },
+              {
+                "t": "warn",
+                "m": "  Integrated LUFS: -70.0 (Target: -10.5, Error: -59.5)"
+              },
+              {
+                "t": "err",
+                "m": "  Max True-Peak:   +0.7 dBTP (Limit: -1.0, Margin: -1.7 dB)"
+              },
+              {
+                "t": "warn",
+                "m": "  Loudness Range:  0.0 LU (Very compressed/squashed)"
+              },
+              {
+                "t": "ok",
+                "m": "  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }

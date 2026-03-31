@@ -239,6 +239,7 @@
     </div>
     
     <button class="run-btn" id="run-btn" disabled>▶ RUN FULL PIPELINE</button>
+    <button class="abort-btn" id="abort-btn" style="display:none" onclick="window.app.abortPipeline()">⏹ ABORT PROCESSING</button>
     <button class="cutter-toggle-btn" id="cutter-toggle-btn" style="display:none" onclick="window.app.trackCutter.toggle()">✂ Track Cutting</button>
     <button class="export-btn" id="export-btn">⬇ EXPORT FILES</button>
     <button class="export-btn" id="archive-btn" style="background:var(--accent2,#2a7a4b)" onclick="window.app.downloadArchive()">🗜 DOWNLOAD ALL (ZIP)</button>

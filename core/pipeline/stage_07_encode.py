@@ -9,6 +9,7 @@ from typing import Dict, Any, List
 import logging
 import soundfile as sf
 import os
+import shutil
 
 from .base import PipelineStage
 
@@ -23,6 +24,14 @@ class Stage07Encode(PipelineStage):
             "6-ch WAV · AC-3 · DTS · metadata embed",
         )
         self.exported_files: List[Dict[str, str]] = []
+
+    def _get_ffmpeg_cmd(self) -> str:
+        """Get full path to ffmpeg executable"""
+        ffmpeg = shutil.which("ffmpeg")
+        if ffmpeg:
+            return ffmpeg
+        # Fallback to direct command (relies on PATH)
+        return "ffmpeg"
 
     async def execute(self, input_path: Path, context: Dict[str, Any]) -> Path:
         self.status = "running"
@@ -73,9 +82,9 @@ class Stage07Encode(PipelineStage):
         wav_name = f"{base_name}_spotify.wav"
         wav_path = output_dir / wav_name
         self.log("cmd", f"$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 {wav_name}")
-        await self._export_wav(input_path, wav_path)
+        await self._export_wav_stereo(input_path, wav_path)
         size_mb = os.path.getsize(str(wav_path)) / 1024 / 1024 if wav_path.exists() else 0
-        self.log("ok", f"  ✓ {wav_name}  48kHz 24-bit  ({size_mb:.1f} MB)")
+        self.log("ok", f"  ✓ {wav_name}  48kHz 24-bit stereo  ({size_mb:.1f} MB)")
         self.exported_files.append({"path": str(wav_path), "filename": wav_name, "format": "WAV 24-bit", "size_mb": round(size_mb, 1), "label": "Spotify Master"})
 
         # 3. Pro FLAC 5.1
@@ -131,6 +140,32 @@ class Stage07Encode(PipelineStage):
         self.log("ok", f"  ✓ {mp3_path.name}  MP3 320k stereo  ({size_mb:.1f} MB)")
         self.exported_files.append({"path": str(mp3_path), "format": "MP3 320k", "size_mb": round(size_mb, 1)})
 
+    async def _export_wav_stereo(self, input_path: Path, output_path: Path):
+        """Export 2-channel stereo WAV downmix (24-bit) — channel-index fold-down (layout-agnostic)"""
+        # Use c0-c5 indices: c0=FL c1=FR c2=FC c3=LFE c4=BL c5=BR
+        ffmpeg_cmd = self._get_ffmpeg_cmd()
+        cmd = [
+            ffmpeg_cmd, "-y",
+            "-i", str(input_path),
+            "-af", "pan=stereo|c0=c0+0.707*c2+0.5*c4+0.1*c3|c1=c1+0.707*c2+0.5*c5+0.1*c3,volume=-1dB,limiter=1.0:1.0:1:all",
+            "-c:a", "pcm_s24le",
+            "-ar", "48000",
+            str(output_path),
+        ]
+        try:
+            logger.info(f"Running ffmpeg: {' '.join(cmd)}")
+            process = await asyncio.create_subprocess_exec(
+                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await process.communicate()
+            if process.returncode != 0:
+                stderr_text = stderr.decode() if stderr else "No stderr output"
+                logger.error(f"Stereo WAV export failed (returncode {process.returncode}): {stderr_text}")
+                raise RuntimeError(f"ffmpeg stereo WAV export failed: {stderr_text}")
+        except Exception as e:
+            logger.error(f"Stereo WAV export subprocess error: {e}")
+            raise RuntimeError(f"ffmpeg stereo WAV export failed: {e}") from e
+
     async def _export_wav(self, input_path: Path, output_path: Path):
         """Export 6-channel WAV using soundfile"""
         try:
@@ -140,7 +175,7 @@ class Stage07Encode(PipelineStage):
         except Exception as e:
             # Fallback to FFmpeg
             cmd = [
-                "ffmpeg", "-y",
+                self._get_ffmpeg_cmd(), "-y",
                 "-i", str(input_path),
                 "-c:a", "pcm_s24le",
                 "-channel_layout", "5.1",
@@ -153,74 +188,103 @@ class Stage07Encode(PipelineStage):
 
     async def _export_ac3(self, input_path: Path, output_path: Path):
         """Export Dolby AC-3 (E-AC-3)"""
+        ffmpeg_cmd = self._get_ffmpeg_cmd()
         cmd = [
-            "ffmpeg", "-y",
+            ffmpeg_cmd, "-y",
             "-i", str(input_path),
             "-c:a", "eac3",
             "-b:a", "640k",
             "-channel_layout", "5.1",
             str(output_path),
         ]
-        process = await asyncio.create_subprocess_exec(
-            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await process.communicate()
-        
-        if process.returncode != 0:
-            logger.error(f"AC-3 export failed: {stderr.decode()}")
+        try:
+            logger.info(f"Running ffmpeg AC-3: {ffmpeg_cmd}")
+            process = await asyncio.create_subprocess_exec(
+                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await process.communicate()
+            if process.returncode != 0:
+                stderr_text = stderr.decode() if stderr else "No stderr output"
+                logger.error(f"AC-3 export failed (returncode {process.returncode}): {stderr_text}")
+                raise RuntimeError(f"ffmpeg AC-3 export failed: {stderr_text}")
+        except Exception as e:
+            logger.error(f"AC-3 export subprocess error: {e}")
+            raise RuntimeError(f"ffmpeg AC-3 export failed: {e}") from e
 
     async def _export_flac(self, input_path: Path, output_path: Path):
         """Export FLAC"""
+        ffmpeg_cmd = self._get_ffmpeg_cmd()
         cmd = [
-            "ffmpeg", "-y",
+            ffmpeg_cmd, "-y",
             "-i", str(input_path),
             "-c:a", "flac",
             str(output_path),
         ]
-        process = await asyncio.create_subprocess_exec(
-            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await process.communicate()
-        
-        if process.returncode != 0:
-            logger.error(f"FLAC export failed: {stderr.decode()}")
+        try:
+            logger.info(f"Running ffmpeg FLAC: {ffmpeg_cmd}")
+            process = await asyncio.create_subprocess_exec(
+                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await process.communicate()
+            if process.returncode != 0:
+                stderr_text = stderr.decode() if stderr else "No stderr output"
+                logger.error(f"FLAC export failed (returncode {process.returncode}): {stderr_text}")
+                raise RuntimeError(f"ffmpeg FLAC export failed: {stderr_text}")
+        except Exception as e:
+            logger.error(f"FLAC export subprocess error: {e}")
+            raise RuntimeError(f"ffmpeg FLAC export failed: {e}") from e
 
     async def _export_dts(self, input_path: Path, output_path: Path):
         """Export DTS"""
+        ffmpeg_cmd = self._get_ffmpeg_cmd()
         cmd = [
-            "ffmpeg", "-y",
+            ffmpeg_cmd, "-y",
             "-i", str(input_path),
             "-c:a", "dts",
             "-b:a", "1509k",
             "-channel_layout", "5.1",
             str(output_path),
         ]
-        process = await asyncio.create_subprocess_exec(
-            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await process.communicate()
-        
-        if process.returncode != 0:
-            logger.error(f"DTS export failed: {stderr.decode()}")
+        try:
+            logger.info(f"Running ffmpeg DTS: {ffmpeg_cmd}")
+            process = await asyncio.create_subprocess_exec(
+                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await process.communicate()
+            if process.returncode != 0:
+                stderr_text = stderr.decode() if stderr else "No stderr output"
+                logger.error(f"DTS export failed (returncode {process.returncode}): {stderr_text}")
+                raise RuntimeError(f"ffmpeg DTS export failed: {stderr_text}")
+        except Exception as e:
+            logger.error(f"DTS export subprocess error: {e}")
+            raise RuntimeError(f"ffmpeg DTS export failed: {e}") from e
 
     async def _export_mp3(self, input_path: Path, output_path: Path):
-        """Export MP3 320k stereo"""
+        """Export MP3 320k stereo — channel-index fold-down (layout-agnostic)"""
+        # Use c0-c5 indices: c0=FL c1=FR c2=FC c3=LFE c4=BL c5=BR
+        ffmpeg_cmd = self._get_ffmpeg_cmd()
         cmd = [
-            "ffmpeg", "-y",
+            ffmpeg_cmd, "-y",
             "-i", str(input_path),
-            "-ac", "2",              # downmix to stereo
+            "-af", "pan=stereo|c0=c0+0.707*c2+0.5*c4+0.1*c3|c1=c1+0.707*c2+0.5*c5+0.1*c3,volume=-1dB,limiter=1.0:1.0:1:all",
             "-c:a", "libmp3lame",
             "-b:a", "320k",
             "-ar", "48000",
             str(output_path),
         ]
-        process = await asyncio.create_subprocess_exec(
-            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await process.communicate()
-
-        if process.returncode != 0:
-            logger.error(f"MP3 export failed: {stderr.decode()}")
+        try:
+            logger.info(f"Running ffmpeg MP3: {ffmpeg_cmd}")
+            process = await asyncio.create_subprocess_exec(
+                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await process.communicate()
+            if process.returncode != 0:
+                stderr_text = stderr.decode() if stderr else "No stderr output"
+                logger.error(f"MP3 export failed (returncode {process.returncode}): {stderr_text}")
+                raise RuntimeError(f"ffmpeg MP3 export failed: {stderr_text}")
+        except Exception as e:
+            logger.error(f"MP3 export subprocess error: {e}")
+            raise RuntimeError(f"ffmpeg MP3 export failed: {e}") from e
 
     async def _write_metadata(self, output_dir: Path, context: Dict):
         """Write EBU R128 and dialnorm metadata"""

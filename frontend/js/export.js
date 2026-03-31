@@ -179,6 +179,7 @@ export class ExportUI {
         <div class="done-icon">✓</div>
         <div class="done-title">Pipeline Complete — Export Ready</div>
         <div class="done-sub">${isBasic ? 'Your files are ready to download.' : 'Files are grouped by playback destination. Check what you need, then export.'}</div>
+        <button onclick="window.app.resetToIdle()" style="margin-top:10px;padding:5px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--text2);font-family:var(--mono);font-size:9px;cursor:pointer">↺ START NEW PROJECT</button>
       </div>
       
       ${contentHtml}

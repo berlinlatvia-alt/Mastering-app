@@ -143,7 +143,7 @@ Downloads manifest + triggers file downloads
 
 | Module | Responsibility | Lines |
 |--------|---------------|-------|
-| `main.py` | FastAPI routes, file I/O, session management | ~250 |
+| `main.py` | FastAPI routes, background tasks, session manager, abort logic | ~300 |
 | `base.py` | PipelineStage interface, logging, progress | ~50 |
 | `manager.py` | Stage orchestration, context sharing | ~100 |
 | `stage_01*.py` | Audio analysis, resampling, LUFS | ~120 |
@@ -279,7 +279,12 @@ python tests/test_api.py
 
 ## Changelog
 
-- **Spotify Genre Presets**: Added `spotify_pop`, `spotify_hiphop`, `spotify_rb`, `spotify_rock` to `constants.py` with custom dynamic control/EQ processing rules in `stage_05_studio_chain.py`.
+- **True-Peak Limiter Rewrite** (Stage 06): Replaced static tanh soft-clipping with proper 5ms look-ahead limiter using 1ms attack/100ms release. Eliminates harmonic distortion in loud sections (especially RnB/Hip-Hop drop-offs at 2:10+ marks).
+- **Abort Responsiveness**: Wrapped CPU-bound Python loops (Stage 05 compressor × 10 channels, Stage 06 limiter) with `asyncio.run_in_executor()`. Event loop now free to deliver cancellation signals → abort response from ~30s to ~1–2s.
+- **Abort Capability**: Added `active_pipeline_task` tracking to `main.py` and `/api/abort` to allow asynchronous cancellation of the pipeline task.
+- **Dynamic Export Naming**: Implemented dynamic ZIP naming and blob-based fetching to resolve "stuck" downloads for large archives.
+- **DSP Quality Audit**: Hardened the Studio Chain against distortion (de-esser clamping) and pumping (HPF sidechaining).
+- **Spotify Genre Presets**: Added `spotify_pop`, `spotify_hiphop`, `spotify_rb`, `spotify_rock` to `constants.py` with custom dynamic control/EQ processing rules.
 - **FLAC Output Support**: Modified `stage_06_loudness.py` and `stage_07_encode.py` to add bypass mechanisms for aggressive mastering presets when a lossless FLAC target format is requested.
 
 ---
@@ -294,5 +299,5 @@ python tests/test_api.py
 
 ---
 
-**Last Updated**: March 20, 2026  
+**Last Updated**: March 24, 2026  
 **Author**: Generation Null

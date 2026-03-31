@@ -30,6 +30,26 @@ export class TrackCutterUI {
     }
   }
 
+  reset() {
+    this.stop();
+    this.audioBuffer = null;
+    this.audioContext = null;
+    this.cutPoints = [];
+    this.currentTime = 0;
+    this.hide();
+    
+    // Clear canvas
+    if (this.waveformCtx) {
+      const width = this.waveformCanvas.width / window.devicePixelRatio;
+      const height = this.waveformCanvas.height / window.devicePixelRatio;
+      this.waveformCtx.clearRect(0, 0, width, height);
+    }
+    
+    // Clear list
+    const listEl = document.getElementById('cut-points-list');
+    if (listEl) listEl.innerHTML = '';
+  }
+
   resizeCanvas() {
     if (!this.waveformCanvas) return;
     const rect = this.waveformCanvas.parentElement.getBoundingClientRect();
