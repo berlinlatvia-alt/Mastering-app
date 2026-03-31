@@ -1,6 +1,8 @@
 """
 Stage 03: Stem Separation (Demucs v4)
 REAL PROCESSING - htdemucs_6s, 6 stems, GPU accelerated
+
+FAST ABORT: Cooperative cancellation checkpoints added for instant abort response.
 """
 
 import asyncio
@@ -23,8 +25,10 @@ class Stage03StemSeparation(PipelineStage):
             "Demucs v4 · 6 stems",
         )
         self.stem_names = ["vocals", "drums", "bass", "guitar", "piano", "other"]
+        self.context = None  # Reference for abort checks
 
     async def execute(self, input_path: Path, context: Dict[str, Any]) -> Path:
+        self.context = context  # Store for abort checks
         self.status = "running"
         model_name = context.get("config", {}).get("stem_model", "htdemucs_6s")
         
@@ -80,6 +84,11 @@ class Stage03StemSeparation(PipelineStage):
 
         # Load audio using Demucs v4 AudioFile API
         self.log("info", "  loading audio...")
+        
+        # FAST ABORT: Check before blocking load
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted during audio load")
+        
         wav = AudioFile(str(input_path)).read(
             streams=0,
             samplerate=model.samplerate,
@@ -106,11 +115,15 @@ class Stage03StemSeparation(PipelineStage):
 
         self.set_progress(70)
 
-        # Save each stem
+        # Save each stem with abort checkpoints
         stem_paths = {}
         sources_list = model.sources if hasattr(model, "sources") else self.stem_names
 
         for idx, name in enumerate(sources_list):
+            # FAST ABORT: Check before each stem save
+            if self.context and self.context.get("abort_requested"):
+                raise asyncio.CancelledError(f"Pipeline aborted during {name} stem export")
+            
             if idx < sources.shape[0]:
                 stem_path = stems_dir / f"{name}.wav"
                 # Save with soundfile (avoids torchcodec dependency)
@@ -121,6 +134,8 @@ class Stage03StemSeparation(PipelineStage):
                 self.log("info", f"  {name + '.wav':12s} exported")
                 stem_paths[name] = stem_path
                 self.set_progress(70 + (20 * (idx + 1) / len(sources_list)))
+                # FAST ABORT: Yield to event loop after each stem
+                await asyncio.sleep(0)
 
         return stem_paths
 

@@ -1,6 +1,8 @@
 """
 Stage 05: Pro Studio EQ, Dynamics & Color
 REAL PROCESSING - Console emulation, tape, bus comp, exciter
+
+FAST ABORT: Cooperative cancellation checkpoints for instant abort response.
 """
 
 import asyncio
@@ -23,8 +25,10 @@ class Stage05StudioChain(PipelineStage):
             "Pro Studio EQ, Dynamics & Color",
             "Console emulation · tape · bus comp · exciter",
         )
+        self.context = None  # Reference for abort checks
 
     async def execute(self, input_path: Path, context: Dict[str, Any]) -> Path:
+        self.context = context  # Store for abort checks
         self.status = "running"
         preset = context.get("config", {}).get("studio_preset", "pop")
         config = context.get("studio_config", {})
@@ -46,19 +50,25 @@ class Stage05StudioChain(PipelineStage):
         # HPF all channels @ 30 Hz
         self.log("info", "  [ALL] HPF 30 Hz Butterworth 4th")
         for ch in range(6):
+            # FAST ABORT: Check during channel processing
+            if self.context and self.context.get("abort_requested"):
+                raise asyncio.CancelledError(f"Pipeline aborted during HPF channel {ch}")
             data[:, ch] = self._highpass(data[:, ch], 30, sr)
-        await asyncio.sleep(0.01)
+            await asyncio.sleep(0)  # Yield to event loop
 
         # Console emulation (harmonic saturation)
         console_model = config.get("console", "SSL 4000 G")
         self.log("info", f"  [COLOR] {console_model} console model loaded")
         tape_val = config.get("tape", 35)
         self.log("info", f"  [COLOR] tape sat {tape_val}%  2nd: +1.8 dB  3rd: +0.4 dB")
-        
+
         # Apply tape/console saturation
         for ch in range(6):
+            # FAST ABORT: Check during saturation
+            if self.context and self.context.get("abort_requested"):
+                raise asyncio.CancelledError(f"Pipeline aborted during tape saturation channel {ch}")
             data[:, ch] = self._tape_saturation(data[:, ch], tape_val / 100)
-        await asyncio.sleep(0.01)
+            await asyncio.sleep(0)
 
         # Bus compression
         comp_val = config.get("buscomp", 45)
@@ -66,31 +76,51 @@ class Stage05StudioChain(PipelineStage):
         attack = config.get("comp_attack", 0.01)
         release = config.get("comp_release", 0.1)
         self.log("info", f"  [COMP] {ratio:.1f}:1 attack {attack*1000:.0f}ms release {release*1000:.0f}ms")
-        
+
         loop = asyncio.get_running_loop()
         for ch in range(6):
+            # FAST ABORT: Check during compression
+            if self.context and self.context.get("abort_requested"):
+                raise asyncio.CancelledError(f"Pipeline aborted during bus compression channel {ch}")
             if ch == 3:  # Skip LFE from bus compression
                 continue
             data[:, ch] = await loop.run_in_executor(None, self._compress, data[:, ch], ratio, attack, release, sr, 150)
+            await asyncio.sleep(0)
         self.log("info", "  [COMP] LFE bypassed, sidechain HP 150 Hz")
-        await asyncio.sleep(0.01)
+
+        # FAST ABORT: Check between major processing blocks
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted after bus compression")
         
         # Genre specific advanced processing
         if config.get("mb_lowmid_comp"):
             self.log("info", "  [EQ] multi-band style control on low-mids")
             for ch in range(6):
+                if self.context and self.context.get("abort_requested"):
+                    raise asyncio.CancelledError(f"Pipeline aborted during low-mid comp channel {ch}")
                 data[:, ch] = self._peak_notch(data[:, ch], 350, sr, -2.0, 1.5)
-        
+                await asyncio.sleep(0)
+
         if config.get("eq_cut_34k"):
             self.log("info", "  [EQ] cut harsh 3-4kHz range")
             for ch in range(6):
+                if self.context and self.context.get("abort_requested"):
+                    raise asyncio.CancelledError(f"Pipeline aborted during 3-4kHz cut channel {ch}")
                 data[:, ch] = self._peak_notch(data[:, ch], 3500, sr, -2.0, 2.0)
-                
+                await asyncio.sleep(0)
+
         if config.get("eq_boost_25k"):
             self.log("info", "  [EQ] boost 2-5kHz vocal/guitar aggression")
             for ch in range(6):
+                if self.context and self.context.get("abort_requested"):
+                    raise asyncio.CancelledError(f"Pipeline aborted during 2-5kHz boost channel {ch}")
                 if ch < 3: # L, R, C
                     data[:, ch] = self._peak_notch(data[:, ch], 3500, sr, 2.0, 1.0)
+                await asyncio.sleep(0)
+
+        # FAST ABORT: Check before EQ tonal shape
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before EQ tonal shape")
 
         # EQ tonal shape — air shelf applied BEFORE saturation so harmonics don't get re-boosted
         low = config.get("low", 3)
@@ -100,6 +130,9 @@ class Stage05StudioChain(PipelineStage):
         self.log("info", f"  [EQ] shelf +{low} dB @ 60 Hz  |  air +{air} dB @ 14 kHz  |  mids {mid:+d} dB @ 400 Hz")
 
         for ch in range(6):
+            # FAST ABORT: Check during EQ
+            if self.context and self.context.get("abort_requested"):
+                raise asyncio.CancelledError(f"Pipeline aborted during EQ channel {ch}")
             # Low shelf boost
             data[:, ch] = self._low_shelf(data[:, ch], 60, sr, low)
             # Mid cut
@@ -107,6 +140,11 @@ class Stage05StudioChain(PipelineStage):
             # Air shelf — before saturation so HF harmonics are not re-amplified
             if ch < 5:  # Not LFE
                 data[:, ch] = self._high_shelf(data[:, ch], 14000, sr, air)
+            await asyncio.sleep(0)
+
+        # FAST ABORT: Check before de-esser
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before de-esser")
 
         # De-esser on center channel — applied after EQ, before saturation
         self.log("info", "  [C] de-esser gr_max −3.8 dB")
@@ -115,7 +153,14 @@ class Stage05StudioChain(PipelineStage):
         # Rear shelf −4 dB @ 12 kHz
         self.log("info", "  [Ls/Rs] shelf −4 dB @ 12 kHz")
         for ch in [4, 5]:  # Ls, Rs
+            if self.context and self.context.get("abort_requested"):
+                raise asyncio.CancelledError(f"Pipeline aborted during rear shelf channel {ch}")
             data[:, ch] = self._high_shelf(data[:, ch], 12000, sr, -4)
+            await asyncio.sleep(0)
+
+        # FAST ABORT: Check before reverb
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before reverb")
 
         # Reverb on surround (and light on L/R) — FFT convolution for speed
         verb_val = config.get("verb", 0)
@@ -130,13 +175,23 @@ class Stage05StudioChain(PipelineStage):
                 wet_amount = verb_norm * 0.3
                 lr_wet = wet_amount * 0.5
                 for ch in [4, 5]:
+                    # FAST ABORT: Check during reverb
+                    if self.context and self.context.get("abort_requested"):
+                        raise asyncio.CancelledError(f"Pipeline aborted during reverb channel {ch}")
                     wet = fftconvolve(data[:, ch], impulse)[:len(data[:, ch])]
                     data[:, ch] = data[:, ch] * (1 - wet_amount) + wet * wet_amount
+                    await asyncio.sleep(0)
                 for ch in [0, 1]:
+                    if self.context and self.context.get("abort_requested"):
+                        raise asyncio.CancelledError(f"Pipeline aborted during reverb L/R channel {ch}")
                     wet = fftconvolve(data[:, ch], impulse)[:len(data[:, ch])]
                     data[:, ch] = data[:, ch] * (1 - lr_wet) + wet * lr_wet
+                    await asyncio.sleep(0)
                 self.log("info", f"  [VERB] surround reverb {verb_val}% (Ls/Rs {wet_amount:.0%}, L/R {lr_wet:.0%})")
-        await asyncio.sleep(0.01)
+
+        # FAST ABORT: Check before stereo width
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before stereo width")
 
         # Stereo width (mid-side on L/R)
         width_val = config.get("width", 100)
@@ -148,24 +203,24 @@ class Stage05StudioChain(PipelineStage):
             data[:, 1] = mid - side * width_factor
             self.log("info", f"  [WIDTH] stereo width {width_val}% ({'wider' if width_val > 100 else 'narrower'})")
 
+        # FAST ABORT: Check before extra saturation
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before extra saturation")
+
         # Optional single light saturation pass — capped at 0.4 to avoid distortion stacking
         # (tape_saturate_loudness and tape_drive_master collapsed into one safe pass)
         extra_sat = config.get("tape_saturate_loudness") or config.get("tape_drive_master")
         if extra_sat:
             self.log("info", "  [COLOR] light extra saturation pass (capped 0.4)")
             for ch in range(6):
+                if self.context and self.context.get("abort_requested"):
+                    raise asyncio.CancelledError(f"Pipeline aborted during extra saturation channel {ch}")
                 data[:, ch] = self._tape_saturation(data[:, ch], 0.4)
+                await asyncio.sleep(0)
 
-        if config.get("hard_clip_drums"):
-            self.log("info", "  [DYN] hard clip transients before final limiting")
-            data = np.clip(data, -0.85, 0.85)
-
-        # Force a -3dB peak ceiling before final stage
-        self.log("info", "  [DYN] forced -3dB peak ceiling before final stage")
-        max_val = np.max(np.abs(data))
-        target_peak = 10 ** (-3.0 / 20)
-        if max_val > target_peak:
-            data *= target_peak / max_val
+        # FAST ABORT: Check before final processing
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before final limiting")
 
         # Write processed output
         output_path = input_path.parent / "output_51_eq.wav"

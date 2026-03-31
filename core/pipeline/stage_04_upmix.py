@@ -1,6 +1,8 @@
 """
 Stage 04: 5.1 Channel Assignment & Spatial Upmix
 REAL PROCESSING - Stem routing, pan law, LFE crossover
+
+FAST ABORT: Cooperative cancellation checkpoints for instant abort response.
 """
 
 import asyncio
@@ -31,8 +33,10 @@ class Stage04Upmix(PipelineStage):
             "Ls": "Drums amb + Other",
             "Rs": "Drums amb + Other",
         }
+        self.context = None  # Reference for abort checks
 
     async def execute(self, input_path: Path, context: Dict[str, Any]) -> Path:
+        self.context = context  # Store for abort checks
         self.status = "running"
         self.log("cmd", "$ python upmix_51.py --stems stems/ --law itu775")
 
@@ -42,8 +46,12 @@ class Stage04Upmix(PipelineStage):
         # Load stems or create placeholders
         stem_data = {}
         sr = 48000
-        
+
         for stem_name in ["vocals", "drums", "bass", "guitar", "piano", "other"]:
+            # FAST ABORT: Check during stem loading
+            if self.context and self.context.get("abort_requested"):
+                raise asyncio.CancelledError(f"Pipeline aborted during {stem_name} stem load")
+            
             stem_path = stems_dir / f"{stem_name}.wav"
             if stem_path.exists() and stem_path.stat().st_size > 0:
                 try:
@@ -56,22 +64,28 @@ class Stage04Upmix(PipelineStage):
                     stem_data[stem_name] = np.zeros((48000, 2))
             else:
                 stem_data[stem_name] = np.zeros((48000, 2))
+            await asyncio.sleep(0)  # Yield to event loop
 
         # Route stems to 5.1 channels
         self.log("info", "  routing stems to channels...")
-        
+
         # Get max length for alignment
         max_len = max(len(d) for d in stem_data.values()) if stem_data else 48000
-        
+
         # Initialize 5.1 channels
         channels = {ch: np.zeros(max_len) for ch in ["L", "R", "C", "LFE", "Ls", "Rs"]}
-        
+
         # Vocals → Center (mono)
         if "vocals" in stem_data:
             vocals = stem_data["vocals"]
             channels["C"][:len(vocals)] = (vocals[:, 0] + vocals[:, 1]) / 2 * 0.7
             self.log("info", "  vocals → C (mono, −1.5 dB)")
-        
+        await asyncio.sleep(0)
+
+        # FAST ABORT: Check between processing blocks
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted during vocals routing")
+
         # Bass → LFE (low-pass filtered) with dynamic routing from preset
         if "bass" in stem_data:
             bass = stem_data["bass"]
@@ -91,7 +105,12 @@ class Stage04Upmix(PipelineStage):
             channels["L"][:len(bass_mono)] += bass_mono * lr_residual
             channels["R"][:len(bass_mono)] += bass_mono * lr_residual
             self.log("info", f"  bass   → LFE ({lfe_crossover:.0f} Hz LP) gain {bass_gain:.2f}x, L/R residual {lr_residual:.2f}x")
-        
+        await asyncio.sleep(0)
+
+        # FAST ABORT: Check between processing blocks
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted during bass routing")
+
         # Drums → L/R wide + Ls/Rs ambience
         if "drums" in stem_data:
             drums = stem_data["drums"]
@@ -101,15 +120,23 @@ class Stage04Upmix(PipelineStage):
             channels["Ls"][:len(drums)] += drums[:, 0] * 0.4
             channels["Rs"][:len(drums)] += drums[:, 1] * 0.4
             self.log("info", "  drums  → L/R wide + Ls/Rs −6 dB")
-        
+        await asyncio.sleep(0)
+
+        # FAST ABORT: Check between processing blocks
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted during drums routing")
+
         # Guitar/Piano → L/R stereo
         for inst in ["guitar", "piano"]:
+            if self.context and self.context.get("abort_requested"):
+                raise asyncio.CancelledError(f"Pipeline aborted during {inst} routing")
             if inst in stem_data:
                 inst_data = stem_data[inst]
                 channels["L"][:len(inst_data)] += inst_data[:, 0] * 0.7
                 channels["R"][:len(inst_data)] += inst_data[:, 1] * 0.7
                 self.log("info", f"  {inst} → L/R stereo")
-        
+            await asyncio.sleep(0)
+
         # Other → Ls/Rs with reverb field
         if "other" in stem_data:
             other = stem_data["other"]
@@ -117,7 +144,11 @@ class Stage04Upmix(PipelineStage):
             channels["Rs"][:len(other)] += other[:, 1] * 0.6
             self.log("info", "  other  → Ls/Rs HF cut")
 
-        await asyncio.sleep(0.02)
+        await asyncio.sleep(0)
+
+        # FAST ABORT: Check before final processing
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before phase coherence check")
 
         # Phase coherence check
         self.log("info", "  phase coherence check...")

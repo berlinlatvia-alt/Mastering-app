@@ -1,6 +1,8 @@
 """
 Pipeline Manager
 Orchestrates all pipeline stages with progress tracking
+
+FAST ABORT: Cooperative cancellation with instant response (<2 seconds).
 """
 
 import asyncio

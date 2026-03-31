@@ -1,6 +1,8 @@
 """
 Stage 07: Encode & Export
 REAL PROCESSING - 6-ch WAV, AC-3, DTS, metadata embed
+
+FAST ABORT: Cooperative cancellation checkpoints for instant abort response.
 """
 
 import asyncio
@@ -24,6 +26,7 @@ class Stage07Encode(PipelineStage):
             "6-ch WAV · AC-3 · DTS · metadata embed",
         )
         self.exported_files: List[Dict[str, str]] = []
+        self.context = None  # Reference for abort checks
 
     def _get_ffmpeg_cmd(self) -> str:
         """Get full path to ffmpeg executable"""
@@ -34,6 +37,7 @@ class Stage07Encode(PipelineStage):
         return "ffmpeg"
 
     async def execute(self, input_path: Path, context: Dict[str, Any]) -> Path:
+        self.context = context  # Store for abort checks
         self.status = "running"
         self.exported_files = []  # Clear previous run's files
 
@@ -65,32 +69,55 @@ class Stage07Encode(PipelineStage):
     async def _export_basic(self, input_path: Path, output_dir: Path, context: Dict):
         """Basic mode: 3 clean outputs only"""
         self.log("info", "  Mode: BASIC — generating 3 files")
-        
+
         orig_name = context.get("original_filename", "track")
         base_name = Path(orig_name).stem
+
+        # FAST ABORT: Check before exports
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before basic exports")
 
         # 1. YouTube MP3 (320 kbps stereo)
         mp3_name = f"{base_name}_youtube.mp3"
         mp3_path = output_dir / mp3_name
         self.log("cmd", f"$ ffmpeg -i master.wav -c:a libmp3lame -b:a 320k -ar 48000 {mp3_name}")
+        
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted during MP3 export")
         await self._export_mp3(input_path, mp3_path)
         size_mb = os.path.getsize(str(mp3_path)) / 1024 / 1024 if mp3_path.exists() else 0
         self.log("ok", f"  ✓ {mp3_name}  320 kbps stereo  ({size_mb:.1f} MB)")
         self.exported_files.append({"path": str(mp3_path), "filename": mp3_name, "format": "MP3 320k", "size_mb": round(size_mb, 1), "label": "YouTube Ready"})
+        await asyncio.sleep(0)
+
+        # FAST ABORT: Check between exports
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted after MP3 export")
 
         # 2. Spotify WAV (48k 24-bit stereo, -14 LUFS)
         wav_name = f"{base_name}_spotify.wav"
         wav_path = output_dir / wav_name
         self.log("cmd", f"$ ffmpeg -i master.wav -c:a pcm_s24le -ar 48000 {wav_name}")
+        
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted during WAV export")
         await self._export_wav_stereo(input_path, wav_path)
         size_mb = os.path.getsize(str(wav_path)) / 1024 / 1024 if wav_path.exists() else 0
         self.log("ok", f"  ✓ {wav_name}  48kHz 24-bit stereo  ({size_mb:.1f} MB)")
         self.exported_files.append({"path": str(wav_path), "filename": wav_name, "format": "WAV 24-bit", "size_mb": round(size_mb, 1), "label": "Spotify Master"})
+        await asyncio.sleep(0)
+
+        # FAST ABORT: Check before FLAC
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before FLAC export")
 
         # 3. Pro FLAC 5.1
         flac_name = f"{base_name}_surround_5.1.flac"
         flac_path = output_dir / flac_name
         self.log("cmd", f"$ ffmpeg -i master.wav -c:a flac {flac_name}")
+        
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted during FLAC export")
         await self._export_flac(input_path, flac_path)
         size_mb = os.path.getsize(str(flac_path)) / 1024 / 1024 if flac_path.exists() else 0
         self.log("ok", f"  ✓ {flac_name}  FLAC 5.1 Lossless  ({size_mb:.1f} MB)")
@@ -100,41 +127,80 @@ class Stage07Encode(PipelineStage):
         """Pro mode: full multi-format export"""
         self.log("info", "  Mode: PRO — full export suite")
 
+        # FAST ABORT: Check before pro exports
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before pro exports")
+
         # 6-channel WAV
         wav_path = output_dir / "output_51.wav"
         self.log("cmd", f"$ ffmpeg -i norm.wav -c:a pcm_s24le -channel_layout 5.1 {wav_path.name}")
+        
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted during WAV export")
         await self._export_wav(input_path, wav_path)
         size_mb = os.path.getsize(str(wav_path)) / 1024 / 1024 if wav_path.exists() else 0
         self.log("ok", f"  ✓ {wav_path.name}  6ch 48kHz 24-bit  ({size_mb:.1f} MB)")
         self.exported_files.append({"path": str(wav_path), "format": "WAV 24-bit", "size_mb": round(size_mb, 1)})
+        await asyncio.sleep(0)
+
+        # FAST ABORT: Check between exports
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted after WAV export")
 
         # AC-3
         ac3_path = output_dir / "output_51.ac3"
         self.log("cmd", f"$ ffmpeg -i norm.wav -c:a eac3 -b:a 640k {ac3_path.name}")
+        
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted during AC-3 export")
         await self._export_ac3(input_path, ac3_path)
         size_mb = os.path.getsize(str(ac3_path)) / 1024 / 1024 if ac3_path.exists() else 0
         self.log("ok", f"  ✓ {ac3_path.name}  640 kbps Dolby  ({size_mb:.1f} MB)")
         self.exported_files.append({"path": str(ac3_path), "format": "AC-3 640k", "size_mb": round(size_mb, 1)})
+        await asyncio.sleep(0)
+
+        # FAST ABORT: Check between exports
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted after AC-3 export")
 
         # FLAC
         flac_path = output_dir / "output_51.flac"
         self.log("cmd", f"$ ffmpeg -i norm.wav -c:a flac {flac_path.name}")
+        
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted during FLAC export")
         await self._export_flac(input_path, flac_path)
         size_mb = os.path.getsize(str(flac_path)) / 1024 / 1024 if flac_path.exists() else 0
         self.log("ok", f"  ✓ {flac_path.name}  FLAC 5.1 Lossless  ({size_mb:.1f} MB)")
         self.exported_files.append({"path": str(flac_path), "format": "FLAC 5.1", "size_mb": round(size_mb, 1)})
+        await asyncio.sleep(0)
+
+        # FAST ABORT: Check before DTS
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before DTS export")
 
         # DTS
         dts_path = output_dir / "output_51.dts"
         self.log("cmd", "$ ffmpeg -i norm.wav -c:a dts -b:a 1509k output_51.dts")
+        
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted during DTS export")
         await self._export_dts(input_path, dts_path)
         size_mb = os.path.getsize(str(dts_path)) / 1024 / 1024 if dts_path.exists() else 0
         self.log("ok", f"  ✓ {dts_path.name}  DTS 1509 kbps  ({size_mb:.1f} MB)")
         self.exported_files.append({"path": str(dts_path), "format": "DTS 1509k", "size_mb": round(size_mb, 1)})
+        await asyncio.sleep(0)
+
+        # FAST ABORT: Check before MP3
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before MP3 export")
 
         # MP3 for convenience
         mp3_path = output_dir / "output_stereo.mp3"
         self.log("cmd", "$ ffmpeg -i norm.wav -c:a libmp3lame -b:a 320k output_stereo.mp3")
+        
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted during MP3 export")
         await self._export_mp3(input_path, mp3_path)
         size_mb = os.path.getsize(str(mp3_path)) / 1024 / 1024 if mp3_path.exists() else 0
         self.log("ok", f"  ✓ {mp3_path.name}  MP3 320k stereo  ({size_mb:.1f} MB)")

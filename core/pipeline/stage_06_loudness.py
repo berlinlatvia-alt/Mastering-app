@@ -1,6 +1,8 @@
 """
 Stage 06: Loudness Normalization (EBU R128)
 REAL PROCESSING - Integrated LUFS, true-peak, LRA measurement
+
+FAST ABORT: Cooperative cancellation checkpoints for instant abort response.
 """
 
 import asyncio
@@ -24,8 +26,10 @@ class Stage06Loudness(PipelineStage):
             "Integrated LUFS · true-peak · LRA",
         )
         self.channels = ["L", "R", "C", "LFE", "Ls", "Rs"]
+        self.context = None  # Reference for abort checks
 
     async def execute(self, input_path: Path, context: Dict[str, Any]) -> Path:
+        self.context = context  # Store for abort checks
         self.status = "running"
         
         studio_config = context.get("studio_config", {})
@@ -56,10 +60,23 @@ class Stage06Loudness(PipelineStage):
 
         # Measure per-channel loudness
         self.log("info", "  measuring loudness per channel...")
+        
+        # FAST ABORT: Check before measurement
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before loudness measurement")
+        
         channel_measurements = await self._measure_loudness(data, sr)
 
         for ch, meas in channel_measurements.items():
+            # FAST ABORT: Check during logging
+            if self.context and self.context.get("abort_requested"):
+                raise asyncio.CancelledError(f"Pipeline aborted during loudness logging for {ch}")
             self.log("info", f"  [{ch:3s}]   {meas['lufs']:+6.1f} LUFS  TP: {meas['tp']:+4.1f} dBTP")
+            await asyncio.sleep(0)
+
+        # FAST ABORT: Check before integrated loudness calculation
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before integrated loudness calculation")
 
         # Calculate integrated loudness (energy sum of all channels)
         # EBU R128 uses K-weighted sum
@@ -76,12 +93,20 @@ class Stage06Loudness(PipelineStage):
 
         self.log("info", f"  integrated loudness: {integrated_lufs:.1f} LUFS")
         self.log("info", f"  applying makeup: {makeup_gain:+.1f} dB → {target_lufs:.1f} LUFS target")
-        
+
+        # FAST ABORT: Check before normalization
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before normalization")
+
         await asyncio.sleep(0.02)
 
         # Apply normalization
         output_path = input_path.parent / "output_51_norm.wav"
         await self._normalize(data, output_path, sr, makeup_gain, tp_limit_db)
+
+        # FAST ABORT: Check before verification
+        if self.context and self.context.get("abort_requested"):
+            raise asyncio.CancelledError("Pipeline aborted before final verification")
 
         # Verify final loudness
         final_data, _ = sf.read(str(output_path))
